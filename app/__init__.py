@@ -1,0 +1,30 @@
+"""Flask app initialization via factory pattern."""
+import os
+
+from flask import Flask
+from flask_bcrypt import Bcrypt
+from flask_cors import CORS
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
+
+from app.config import config_by_name
+
+
+cors = CORS()
+db = SQLAlchemy()
+bcrypt = Bcrypt()
+migrate = Migrate()
+
+def create_app(config_name):
+    app = Flask(__name__)
+    app.config.from_object(config_by_name[config_name])
+
+    from app.api import api_bp
+    app.register_blueprint(api_bp)
+
+    db.init_app(app)
+    migrate.init_app(app, db)
+    bcrypt.init_app(app)
+    cors.init_app(app)
+
+    return app
