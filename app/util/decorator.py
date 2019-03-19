@@ -34,8 +34,7 @@ def admin_token_required(f):
         if not admin:
             response_object = {
                 'status': 'fail',
-                'message': 'admin token required'
-            }
+                'message': 'admin token required'}
             return response_object, 401
         return f(*args, **kwargs)
     return decorated

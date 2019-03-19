@@ -21,16 +21,3 @@ def string_is_null_or_blank(string):
     """Check if a string is null or consists entirely of whitespace."""
     return not string or string.isspace()
 
-
-def sanitize_url(scraped_url):
-    if string_is_null_or_blank(scraped_url):
-        return None
-    match = URL_REGEX.match(scraped_url)
-    return match.group() if match else None
-
-
-def sanitize_version_number(scraped_ver_num):
-    if string_is_null_or_blank(scraped_ver_num):
-        return None
-    match = VERSION_NUMBER_REGEX.search(scraped_ver_num)
-    return match.group() if match else None

@@ -4,10 +4,20 @@ import os
 import unittest
 from pathlib import Path
 
+COV = coverage.coverage(
+    branch=True,
+    include='app/*',
+    omit=[
+        'app/test/*',
+        'app/config.py'
+    ]
+)
+COV.start()
+
 import click
 
 from app import create_app, db
-from app.config import APP_FOLDER
+from app.config import APP_FOLDER, APP_ROOT
 
 TEST_FOLDER = APP_FOLDER / 'test'
 app = create_app(os.getenv('ENV') or 'dev')
@@ -16,17 +26,6 @@ from app.models.blacklist_token import BlacklistToken
 from app.models.product import Product
 from app.models.user import User
 
-
-COV = coverage.coverage(
-    branch=True,
-    include='app/*',
-    omit=[
-        'app/test/*',
-        'app/config.py',
-        'app/*/__init__.py'
-    ]
-)
-COV.start()
 
 @app.cli.command()
 def run():
@@ -51,10 +50,9 @@ def cov():
         COV.save()
         print('Coverage Summary:')
         COV.report()
-        basedir = os.path.abspath(os.path.dirname(__file__))
-        covdir = os.path.join(basedir, 'tmp/coverage')
-        COV.html_report(directory=covdir)
-        print('HTML version: file://%s/index.html' % covdir)
+        covdir = APP_ROOT / 'tmp' / 'coverage'
+        COV.html_report(directory=str(covdir))
+        print('\nHTML version: file://%s/index.html' % covdir)
         COV.erase()
         return 0
     return 1

@@ -1,7 +1,9 @@
 """Defines data models used by /api/product endpoints."""
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from email.utils import format_datetime
+
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from app import db
 
@@ -17,6 +19,20 @@ class Product(db.Model):
     download_url = db.Column(db.String(), unique=False)
     last_update = db.Column(db.DateTime, nullable=True, default=datetime.min)
     last_checked = db.Column(db.DateTime, nullable=True, default=datetime.min)
+
+    @hybrid_property
+    def last_update_utc_iso(self):
+        if self.last_update:
+            last_update_utc = self.last_update.replace(tzinfo=timezone.utc)
+            return last_update_utc.isoformat()
+        return None
+
+    @hybrid_property
+    def last_checked_utc_iso(self):
+        if self.last_checked:
+            last_checked_utc = self.last_checked.replace(tzinfo=timezone.utc)
+            return last_checked_utc.isoformat()
+        return None
 
     def __init__(
         self,

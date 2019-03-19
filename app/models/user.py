@@ -9,7 +9,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from app import db, bcrypt
 from app.config import key
 from app.models.blacklist_token import BlacklistToken
-from app.util.datetime_functions import format_timedelta_precise
 from app.util.dt_format_strings import DT_STR_FORMAT_ALL
 from app.util.string_functions import parse_auth_token
 from app.util.result import Result

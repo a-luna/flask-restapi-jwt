@@ -1,6 +1,7 @@
 .env
 .flaskenv
 .vscode
+tmp
 venv
 *.rdb
 *.db

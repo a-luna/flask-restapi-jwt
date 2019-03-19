@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from flask import url_for, jsonify
+from flask_restplus import abort
 
 from app import db
 from app.models.product import Product
@@ -14,11 +15,7 @@ def retrieve_product(product_name):
     if release_info:
         return release_info, 200
     else:
-        response_object = {
-            'status': 'fail',
-            f'message': '{product_name} not found in database.',
-        }
-        return response_object, 404
+        abort(404, f'{product_name} not found in database.', status='fail')
 
 
 def create_product(data):
@@ -55,16 +52,16 @@ def create_product(data):
 
 
 def update_product(product_name, data):
+    request_data = {k:v for k,v in data.items()}
     updated = Product.find_by_name(product_name)
     if not updated:
-        data['product_name'] = product_name
-        return create_product(data)
+        request_data['product_name'] = product_name
+        return create_product(request_data)
     try:
-        for k, v in data.items():
+        for k, v in request_data.items():
             setattr(updated, k, v)
         setattr(updated, 'last_update', datetime.utcnow())
         db.session.commit()
-        product_data = updated.as_table_data()
         response_object = {
             'status': 'success',
             'data': {
@@ -74,10 +71,8 @@ def update_product(product_name, data):
                 'xpath_download_url': updated.xpath_download_url,
                 'newest_version_number': updated.newest_version_number,
                 'download_url': updated.download_url,
-                'last_update': product_data['last_update_utc_iso'],
-                'last_checked': product_data['last_checked_utc_iso']
-            }
-        }
+                'last_update': updated.last_update_utc_iso,
+                'last_checked': updated.last_checked_utc_iso}}
         return response_object, 200
     except Exception as e:
         response_object = {
