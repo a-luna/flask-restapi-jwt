@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from tzlocal import get_localzone
 
 from app.util.dt_format_strings import DT_STR_FORMAT, DT_FORMAT_ISO
-from app.util.better_getattr import better_getattr
+from app.util.result import Result
 
 
 def get_dt_iso_format_utc(obj, attr_name):
@@ -58,3 +58,19 @@ def convert_dt_to_user_tz(dt, user_tz=None, str_format=DT_STR_FORMAT):
 
 def convert_dt_to_user_tz_str(dt, user_tz=None, str_format=DT_STR_FORMAT):
     return convert_dt_to_user_tz(dt, user_tz, str_format).strftime(str_format)
+
+
+def better_getattr(obj, attr_name):
+    """Acts exactly as getattr(), but extends to dict objects."""
+    if type(obj) is dict and attr_name in obj:
+        value = obj[attr_name]
+    elif hasattr(obj, attr_name):
+        value = getattr(obj, attr_name)
+    else:
+        error = (
+            'Error! Attribute does not exist:\n'
+            'Object: {o}, Type: {t}, Attr Name: {a}'
+            .format(o=obj, t=type(obj), a=attr_name)
+        )
+        return Result.Fail(error)
+    return Result.Ok(value)

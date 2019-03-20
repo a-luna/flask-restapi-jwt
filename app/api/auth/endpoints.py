@@ -7,7 +7,6 @@ from app.api.auth.dto import login_reqparser, token_reqparser, user_reqparser
 from app.api.auth.business import (
     register_new_user, process_login, process_logout, get_logged_in_user
 )
-from app.util.decorator import token_required
 
 
 @auth_ns.route('/register')
@@ -63,7 +62,6 @@ class LogoutUser(Resource):
             401: 'Error occurred decoding session token.',
             403: 'Auth token is invalid (malformed)',
             500: 'Internal server error.'})
-    @token_required
     def post(self):
         """Add token to blacklist, deauthenticating the current user."""
         args = token_reqparser.parse_args()
@@ -82,7 +80,6 @@ class AuthStatus(Resource):
         responses={
             200: 'Token is valid for current user.',
             401: 'Error occurred decoding session token.'})
-    @token_required
     def get(self):
         """Validate a session token."""
         args = token_reqparser.parse_args()

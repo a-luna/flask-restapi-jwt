@@ -2,6 +2,7 @@
 from flask import request
 from flask_restplus import Resource
 
+from app.api.auth.decorator import admin_token_required
 from app.api.product import product_ns
 from app.api.product.business import (
     retrieve_product, create_product, update_product, delete_product
@@ -11,7 +12,6 @@ from app.api.product.dto import (
     pagination_parser, product_api_model, pagination_api_model,
 )
 from app.models.product import Product as ProductModel
-from app.util.decorator import admin_token_required
 
 
 @product_ns.route("/")

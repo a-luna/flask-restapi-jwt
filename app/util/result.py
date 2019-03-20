@@ -22,7 +22,7 @@ class Result():
             return f'[Failure] {self.error}'
 
     def __repr__(self):
-        return f'Result(success={self.success}, message="{self.error}")'
+        return f'Result<(success={self.success}, message="{self.error}")>'
 
     @staticmethod
     def Fail(message):

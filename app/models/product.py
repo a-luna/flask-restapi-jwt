@@ -1,7 +1,6 @@
 """Defines data models used by /api/product endpoints."""
 import os
 from datetime import datetime, timezone
-from email.utils import format_datetime
 
 from sqlalchemy.ext.hybrid import hybrid_property
 

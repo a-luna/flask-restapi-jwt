@@ -1,16 +1,16 @@
 """User model for storing logon credentials and other details."""
 import jwt
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
+from http import HTTPStatus
 
 from flask import current_app
-from sqlalchemy.ext.hybrid import hybrid_property
+from flask_restplus import abort
 
 from app import db, bcrypt
 from app.config import key
 from app.models.blacklist_token import BlacklistToken
-from app.util.dt_format_strings import DT_STR_FORMAT_ALL
-from app.util.string_functions import parse_auth_token
+from app.util.jwt_functions import get_auth_token
 from app.util.result import Result
 
 
@@ -40,8 +40,7 @@ class User(db.Model):
                 f'public_id={self.public_id}, '
                 f'username={self.username}, '
                 f'email={self.email}'
-            ')>'
-        )
+            ')>')
 
     @property
     def password(self):
@@ -50,8 +49,8 @@ class User(db.Model):
     @password.setter
     def password(self, password):
         self.password_hash = bcrypt.generate_password_hash(
-            password, current_app.config.get('BCRYPT_LOG_ROUNDS')
-        ).decode('utf-8')
+            password,
+            current_app.config.get('BCRYPT_LOG_ROUNDS')).decode('utf-8')
 
     def check_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password)
@@ -60,37 +59,35 @@ class User(db.Model):
         """Generate auth token."""
         try:
             now = datetime.utcnow()
-            token_age_hours = current_app.config.get('AUTH_TOKEN_AGE_HOURS')
-            token_age_minutes = current_app.config.get('AUTH_TOKEN_AGE_MINUTES')
             expire_time = now + timedelta(
-                    hours=token_age_hours,
-                    minutes=token_age_minutes,
+                    hours=current_app.config.get('AUTH_TOKEN_AGE_HOURS'),
+                    minutes=current_app.config.get('AUTH_TOKEN_AGE_MINUTES'),
                     seconds=5)
-            payload = {
-                'exp': expire_time,
-                'iat': now,
-                'sub': self.public_id}
+            payload = dict(
+                exp=expire_time,
+                iat=now,
+                sub=self.public_id)
             return jwt.encode(
                 payload,
                 key,
                 algorithm='HS256')
         except Exception as e:
-            return e
+            error = f'Error: {repr(e)}'
+            abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status='fail')
 
     @classmethod
     def decode_auth_token(cls, auth_token):
         """Decode the auth token."""
+        result = get_auth_token(auth_token)
+        if result.failure:
+            return Result.Fail(result.error)
+        auth_token = result.value
+        if BlacklistToken.check_blacklist(auth_token):
+            error = 'Token blacklisted. Please log in again.'
+            return Result.Fail(error)
         try:
-            result = parse_auth_token(auth_token)
-            if result.failure:
-                return result
-            parsed_token = result.value
-            if BlacklistToken.check_blacklist(parsed_token):
-                error = 'Token blacklisted. Please log in again.'
-                return Result.Fail(error)
-            else:
-                payload = jwt.decode(parsed_token, key)
-                return Result.Ok(payload['sub'])
+            payload = jwt.decode(auth_token, key)
+            return Result.Ok(payload['sub'])
         except jwt.ExpiredSignatureError:
             error =  'Authorization token expired. Please log in again.'
             return Result.Fail(error)

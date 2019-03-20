@@ -2,7 +2,6 @@
 import coverage
 import os
 import unittest
-from pathlib import Path
 
 COV = coverage.coverage(
     branch=True,

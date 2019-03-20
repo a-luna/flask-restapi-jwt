@@ -4,7 +4,7 @@ import unittest
 from flask_testing import TestCase
 
 from app import create_app
-from app.config import APP_FOLDER, config_by_name
+from app.config import APP_FOLDER
 
 
 class TestDevelopmentConfig(TestCase):

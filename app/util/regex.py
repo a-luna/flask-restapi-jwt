@@ -15,9 +15,3 @@ GUID_REGEX = re.compile(
 )
 DB_OBJECT_NAME_PATTERN = r'^[a-z0-9_-]+$'
 DB_OBJECT_NAME_REGEX = re.compile(DB_OBJECT_NAME_PATTERN)
-
-
-def string_is_null_or_blank(string):
-    """Check if a string is null or consists entirely of whitespace."""
-    return not string or string.isspace()
-

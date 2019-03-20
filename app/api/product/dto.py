@@ -1,16 +1,11 @@
 """Parsers and serializers for /product API endpoints."""
-import re
-from datetime import timezone
-
-from flask_restplus import Namespace, fields, reqparse
+from flask_restplus import fields, reqparse
 from flask_restplus.reqparse import Argument
 from flask_restplus.inputs import URL
 
 from app.api.product import product_ns
-from app.api.auth.dto import json_web_token
 from app.util.datetime_functions import get_dt_iso_format_utc
 from app.util.regex import DB_OBJECT_NAME_PATTERN, DB_OBJECT_NAME_REGEX
-from app.util.string_functions import string_is_null_or_blank
 
 
 def product_name(name):
@@ -30,7 +25,7 @@ def product_name(name):
 
 def xpath_query(xpath):
     """Return xpath if valid, raise an excaption if validation fails."""
-    if not string_is_null_or_blank(xpath):
+    if xpath and not xpath.isspace():
         return xpath
     else:
         raise ValueError('XPath query must not be null or empty string.')

@@ -2,7 +2,6 @@
 from flask_testing import TestCase
 
 from app import create_app, db
-from app.config import config_by_name
 
 
 class BaseTestCase(TestCase):
