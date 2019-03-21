@@ -5,7 +5,6 @@ from flask_restplus import abort
 
 from app import db
 from app.models.product import Product
-from app.util.datetime_functions import DT_FORMAT_ISO
 
 
 def retrieve_product(product_name):

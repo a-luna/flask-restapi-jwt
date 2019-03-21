@@ -6,10 +6,12 @@ from http import HTTPStatus
 
 from flask import current_app
 from flask_restplus import abort
+from sqlalchemy.ext.hybrid import hybrid_property
 
 from app import db, bcrypt
 from app.config import key
 from app.models.blacklist_token import BlacklistToken
+from app.util.dt_format_strings import DT_STR_FORMAT_NAIVE
 from app.util.jwt_functions import get_auth_token
 from app.util.result import Result
 
@@ -25,6 +27,11 @@ class User(db.Model):
     public_id = db.Column(db.String(100), unique=True)
     username = db.Column(db.String(50), unique=True)
     password_hash = db.Column(db.String(100))
+
+    @hybrid_property
+    def registered_on_str(self):
+        return self.registered_on.strftime(DT_STR_FORMAT_NAIVE) \
+            if self.registered_on else None
 
     def __init__(self, email, username, password, admin=False):
         self.email = email

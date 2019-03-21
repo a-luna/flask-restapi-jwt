@@ -99,8 +99,8 @@ def create_product_happy_path(self):
     self.assertTrue(retrieve_product_data['product_name'] == 'python_v3_7')
     self.assertTrue(retrieve_product_data['newest_version_number'] == newest_version)
     self.assertTrue(retrieve_product_data['download_url'] == download_url)
-    self.assertTrue(retrieve_product_data['last_checked'] == check_time_str)
-    self.assertTrue(retrieve_product_data['last_update'] == update_time_str)
+    self.assertTrue(retrieve_product_data['last_checked_utc_iso'] == check_time_str)
+    self.assertTrue(retrieve_product_data['last_update_utc_iso'] == update_time_str)
     self.assertTrue(retrieve_product_response.content_type == 'application/json')
     self.assertEqual(retrieve_product_response.status_code, HTTPStatus.OK)
     return product, jwt_auth

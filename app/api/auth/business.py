@@ -6,7 +6,6 @@ from flask_restplus import abort
 from app import db
 from app.models.blacklist_token import BlacklistToken
 from app.models.user import User
-from app.util.datetime_functions import convert_dt_for_display
 
 
 def register_new_user(data):
@@ -83,7 +82,7 @@ def get_logged_in_user(auth_token):
             user_id=user.id,
             email=user.email,
             admin=user.admin,
-            registered_on=convert_dt_for_display(user, 'registered_on'))
+            registered_on=user.registered_on_str)
         response_dict = dict(
             status='success',
             data=user_data)

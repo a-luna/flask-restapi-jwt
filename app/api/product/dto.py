@@ -4,7 +4,6 @@ from flask_restplus.reqparse import Argument
 from flask_restplus.inputs import URL
 
 from app.api.product import product_ns
-from app.util.datetime_functions import get_dt_iso_format_utc
 from app.util.regex import DB_OBJECT_NAME_PATTERN, DB_OBJECT_NAME_REGEX
 
 
@@ -110,14 +109,12 @@ product_api_model = product_ns.model(
             readonly=True,
             required=False
         ),
-        'last_checked': fields.String(
-            attribute=lambda x: get_dt_iso_format_utc(x, 'last_checked'),
+        'last_checked_utc_iso': fields.String(
             default='',
             readonly=True,
             required=False
         ),
-        'last_update': fields.String(
-            attribute=lambda x: get_dt_iso_format_utc(x, 'last_update'),
+        'last_update_utc_iso': fields.String(
             default='',
             readonly=True,
             required=False
