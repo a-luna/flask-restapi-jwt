@@ -44,7 +44,7 @@ class ProductionConfig(Config):
 
     DEBUG = False
     AUTH_TOKEN_AGE_HOURS = 1
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_main.db')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', None)
     PRESERVE_CONTEXT_ON_EXCEPTION = True
 
 
