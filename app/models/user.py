@@ -85,10 +85,9 @@ class User(db.Model):
     @classmethod
     def decode_auth_token(cls, auth_token):
         """Decode the auth token."""
-        result = get_auth_token(auth_token)
-        if result.failure:
-            return Result.Fail(result.error)
-        auth_token = result.value
+        if auth_token.startswith('Bearer '):
+            split = auth_token.split('Bearer')
+            auth_token = split[1].strip()
         if BlacklistToken.check_blacklist(auth_token):
             error = 'Token blacklisted. Please log in again.'
             return Result.Fail(error)

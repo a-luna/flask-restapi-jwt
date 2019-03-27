@@ -1,11 +1,13 @@
-.PHONY: python-packages install test test-cov run all
+.PHONY: install upgrade test test-cov run all
 
-python-packages:
+install:
 	@echo 'INSTALLING REQUIRED PYTHON PACKAGES...'
 	@output=`pip install --upgrade pip setuptools wheel 2>&1` || echo $output
 	@output=`pip install -r requirements.txt 2>&1` || echo $output
 
-install: python-packages
+upgrade:
+	@echo 'UPGRADING INSTALLED PYTHON PACKAGES...'
+	@pip-review -av
 
 test:
 	@echo 'RUNNING UNIT TESTS...'
@@ -19,4 +21,4 @@ run:
 	@echo 'STARTING FLASK WEB APPLICATION...'
 	@flask run -p 5001
 
-all: clean install test-cov run
+all: install test-cov run

@@ -1,5 +1,6 @@
 """Parsers and serializers for /auth API endpoints."""
 from flask_restplus import reqparse
+from flask_restplus.reqparse import Argument
 from flask_restplus.inputs import email
 
 from app.util.regex import DB_OBJECT_NAME_REGEX
@@ -18,9 +19,7 @@ def username(name):
     # Swagger documentation
     username.__schema__ = {'type': 'string', 'format': 'username'}
 
-
-login_reqparser = reqparse.RequestParser(bundle_errors=True)
-login_reqparser.add_argument(
+email_arg = Argument(
     name='email',
     dest='email',
     type=email(),
@@ -29,7 +28,17 @@ login_reqparser.add_argument(
     nullable=False,
     help='User email address.'
 )
-login_reqparser.add_argument(
+
+username_arg = Argument(
+    name='username',
+    dest='username',
+    type=username,
+    location='form',
+    required=True,
+    nullable=False
+)
+
+password_arg = Argument(
     name='password',
     dest='password',
     type=str,
@@ -39,8 +48,7 @@ login_reqparser.add_argument(
     help='User password.'
 )
 
-token_reqparser = reqparse.RequestParser()
-token_reqparser.add_argument(
+auth_token_arg = Argument(
     name='Authorization',
     dest='Authorization',
     location='headers',
@@ -48,28 +56,14 @@ token_reqparser.add_argument(
     nullable=False
 )
 
+login_reqparser = reqparse.RequestParser(bundle_errors=True)
+login_reqparser.add_argument(email_arg)
+login_reqparser.add_argument(password_arg)
+
+token_reqparser = reqparse.RequestParser()
+token_reqparser.add_argument(auth_token_arg)
+
 user_reqparser = reqparse.RequestParser(bundle_errors=True)
-user_reqparser.add_argument(
-    name='email',
-    dest='email',
-    type=email(),
-    location='form',
-    required=True,
-    nullable=False
-)
-user_reqparser.add_argument(
-    name='username',
-    dest='username',
-    type=username,
-    location='form',
-    required=True,
-    nullable=False
-)
-user_reqparser.add_argument(
-    name='password',
-    dest='password',
-    type=str,
-    location='form',
-    required=True,
-    nullable=False
-)
+user_reqparser.add_argument(email_arg)
+user_reqparser.add_argument(username_arg)
+user_reqparser.add_argument(password_arg)

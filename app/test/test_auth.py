@@ -72,12 +72,8 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(
                 register_data['message'],
                 '"new_user@email.com" is already registered. Please Log in.')
-            self.assertEqual(
-                register_response.content_type,
-                'application/json')
-            self.assertEqual(
-                register_response.status_code,
-                HTTPStatus.CONFLICT)
+            self.assertEqual(register_response.content_type, 'application/json')
+            self.assertEqual(register_response.status_code, HTTPStatus.CONFLICT)
 
     def test_registered_user_login(self):
         with self.client:
@@ -92,13 +88,9 @@ class TestAuthBlueprint(BaseTestCase):
                 'test1234')
             login_data = login_response.get_json()
             self.assertEqual(login_data['status'], 'fail')
-            self.assertEqual(
-                login_data['message'],
-                'email or password does not match.')
+            self.assertEqual(login_data['message'], 'email or password does not match.')
             self.assertEqual(login_response.content_type, 'application/json')
-            self.assertEqual(
-                login_response.status_code,
-                HTTPStatus.UNAUTHORIZED)
+            self.assertEqual(login_response.status_code, HTTPStatus.UNAUTHORIZED)
 
     def test_auth_status(self):
         with self.client:
@@ -122,12 +114,8 @@ class TestAuthBlueprint(BaseTestCase):
                 headers=dict(Authorization='Bearer ad2321dkfad..dgredf324df'))
             auth_status_data = auth_status_response.get_json()
             self.assertEqual(auth_status_data['status'], 'fail')
-            self.assertEqual(
-                auth_status_data['message'],
-                'Please provide a valid auth token.')
-            self.assertEqual(
-                auth_status_response.status_code,
-                HTTPStatus.UNAUTHORIZED)
+            self.assertEqual(auth_status_data['message'], 'Invalid token. Please log in again.')
+            self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
 
     def test_auth_status_malformed_bearer_token_2(self):
         with self.client:
@@ -141,12 +129,8 @@ class TestAuthBlueprint(BaseTestCase):
                 headers=dict(Authorization=bad_token))
             auth_status_data = auth_status_response.get_json()
             self.assertEqual(auth_status_data['status'], 'fail')
-            self.assertEqual(
-                auth_status_data['message'],
-                'Invalid token. Please log in again.')
-            self.assertEqual(
-                auth_status_response.status_code,
-                HTTPStatus.UNAUTHORIZED)
+            self.assertEqual(auth_status_data['message'], 'Invalid token. Please log in again.')
+            self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
 
     def test_valid_logout(self):
         with self.client:
@@ -157,9 +141,7 @@ class TestAuthBlueprint(BaseTestCase):
                 headers=dict(Authorization=f'Bearer {jwt_auth}'))
             logout_data = json.loads(logout_response.data.decode())
             self.assertEqual(logout_data['status'], 'success')
-            self.assertEqual(
-                logout_data['message'],
-                'Successfully logged out.')
+            self.assertEqual(logout_data['message'], 'Successfully logged out.')
             self.assertEqual(logout_response.status_code, HTTPStatus.OK)
 
     def test_invalid_logout(self):
@@ -175,9 +157,7 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(
                 logout_data['message'],
                 'Authorization token expired. Please log in again.')
-            self.assertEqual(
-                logout_response.status_code,
-                HTTPStatus.UNAUTHORIZED)
+            self.assertEqual(logout_response.status_code, HTTPStatus.UNAUTHORIZED)
 
     def test_valid_blacklisted_token_logout(self):
         with self.client:
@@ -191,12 +171,8 @@ class TestAuthBlueprint(BaseTestCase):
                 headers=dict(Authorization=f'Bearer {jwt_auth}'))
             logout_data = logout_response.get_json()
             self.assertEqual(logout_data['status'], 'fail')
-            self.assertEqual(
-                logout_data['message'],
-                'Token blacklisted. Please log in again.')
-            self.assertEqual(
-                logout_response.status_code,
-                HTTPStatus.UNAUTHORIZED)
+            self.assertEqual(logout_data['message'],'Token blacklisted. Please log in again.')
+            self.assertEqual(logout_response.status_code, HTTPStatus.UNAUTHORIZED)
 
     def test_valid_blacklisted_token_user(self):
         with self.client:
@@ -209,12 +185,8 @@ class TestAuthBlueprint(BaseTestCase):
                 headers=dict(Authorization=f'Bearer {jwt_auth}'))
             auth_status_data = auth_status_response.get_json()
             self.assertEqual(auth_status_data['status'], 'fail')
-            self.assertEqual(
-                auth_status_data['message'],
-                'Token blacklisted. Please log in again.')
-            self.assertEqual(
-                auth_status_response.status_code,
-                HTTPStatus.UNAUTHORIZED)
+            self.assertEqual(auth_status_data['message'], 'Token blacklisted. Please log in again.')
+            self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 if __name__ == '__main__':
