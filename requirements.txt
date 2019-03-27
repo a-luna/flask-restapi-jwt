@@ -21,6 +21,7 @@ Flask-Migrate==2.4.0
 flask-restplus==0.12.1
 Flask-SQLAlchemy==2.3.2
 Flask-Testing==0.7.1
+gunicorn==19.9.0
 idna==2.8
 imagesize==1.1.0
 isort==4.3.16
