@@ -46,7 +46,6 @@ class ProductList(Resource):
     @admin_token_required
     def post(self):
         """Add new product."""
-        v = request
         args = post_product_parser.parse_args()
         return create_product(data=args)
 

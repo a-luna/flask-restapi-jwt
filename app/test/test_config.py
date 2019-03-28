@@ -1,4 +1,5 @@
 """Unit tests for app configurations."""
+import os
 import unittest
 
 from flask_testing import TestCase
@@ -6,6 +7,8 @@ from flask_testing import TestCase
 from app import create_app
 from app.config import APP_FOLDER
 
+DB_URL_DEV = 'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_dev.db')
+DB_URL_TEST = 'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_test.db')
 
 class TestDevelopmentConfig(TestCase):
     """Verify expected values for DevelopmentConfig settings."""
@@ -16,13 +19,10 @@ class TestDevelopmentConfig(TestCase):
 
     def test_config_development(self):
         self.assertFalse(self.app is None)
-        self.assertFalse(self.app.config['SECRET_KEY'] is 'open_sesame')
+        self.assertNotEqual(self.app.config['SECRET_KEY'], 'open_sesame')
         self.assertTrue(self.app.config['DEBUG'])
         self.assertFalse(self.app.config['TESTING'])
-        self.assertTrue(
-            self.app.config['SQLALCHEMY_DATABASE_URI'] == \
-                'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_dev.db')
-        )
+        self.assertEqual(self.app.config['SQLALCHEMY_DATABASE_URI'], DB_URL_DEV)
         self.assertEqual(self.app.config['AUTH_TOKEN_AGE_HOURS'], 0)
         self.assertEqual(self.app.config['AUTH_TOKEN_AGE_MINUTES'], 15)
 
@@ -39,10 +39,7 @@ class TestTestingConfig(TestCase):
         self.assertFalse(self.app.config['SECRET_KEY'] is 'open_sesame')
         self.assertTrue(self.app.config['DEBUG'])
         self.assertTrue(self.app.config['TESTING'])
-        self.assertTrue(
-            self.app.config['SQLALCHEMY_DATABASE_URI'] == \
-                'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_test.db')
-        )
+        self.assertEqual(self.app.config['SQLALCHEMY_DATABASE_URI'], DB_URL_TEST)
         self.assertEqual(self.app.config['AUTH_TOKEN_AGE_HOURS'], 0)
         self.assertEqual(self.app.config['AUTH_TOKEN_AGE_MINUTES'], 0)
 
@@ -59,10 +56,9 @@ class TestProductionConfig(TestCase):
         self.assertFalse(self.app.config['SECRET_KEY'] is 'open_sesame')
         self.assertFalse(self.app.config['DEBUG'])
         self.assertFalse(self.app.config['TESTING'])
-        self.assertTrue(
-            self.app.config['SQLALCHEMY_DATABASE_URI'] == \
-                'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_main.db')
-        )
+        self.assertEqual(
+            self.app.config['SQLALCHEMY_DATABASE_URI'],
+            os.getenv('DATABASE_URL'))
         self.assertEqual(self.app.config['AUTH_TOKEN_AGE_HOURS'], 1)
         self.assertEqual(self.app.config['AUTH_TOKEN_AGE_MINUTES'], 0)
 

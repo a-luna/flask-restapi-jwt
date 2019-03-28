@@ -34,7 +34,7 @@ def create_product(data):
         response_object = dict(
             status='success',
             message=f'New product added: {product_name}.',
-            location=f'/api/product/{product_name}')
+            location=f'/api/v1/product/{product_name}')
         return response_object, HTTPStatus.CREATED
     except Exception as e:
         error = f'Error: {repr(e)}'

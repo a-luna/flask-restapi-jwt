@@ -17,13 +17,14 @@ _API_DESCRIPTION = (
     'product is updated every 60 minutes.'
 )
 
-api_bp = Blueprint('api', __name__)
+api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 
 api = Api(
     api_bp,
     version='1.0',
     title='Newest Version API',
-    description=_API_DESCRIPTION
+    description=_API_DESCRIPTION,
+    doc='/ui'
 )
 
 

@@ -74,7 +74,7 @@ def create_product_happy_path(self):
     create_product_data = create_product_response.get_json()
     self.assertEqual(create_product_data['status'], 'success')
     self.assertEqual(create_product_data['message'], 'New product added: python_v3_7.')
-    self.assertEqual(create_product_data['location'], '/api/product/python_v3_7')
+    self.assertEqual(create_product_data['location'], '/api/v1/product/python_v3_7')
     self.assertEqual(create_product_response.content_type, 'application/json')
     self.assertEqual(create_product_response.status_code, HTTPStatus.CREATED)
     product = Product.find_by_name('python_v3_7')
@@ -243,7 +243,7 @@ class TestProductBlueprint(BaseTestCase):
             update_product_data = update_product_response.get_json()
             self.assertEqual(update_product_data['status'], 'success')
             self.assertEqual(update_product_data['message'], 'New product added: python_v3_7.')
-            self.assertEqual(update_product_data['location'], '/api/product/python_v3_7')
+            self.assertEqual(update_product_data['location'], '/api/v1/product/python_v3_7')
             self.assertEqual(update_product_response.content_type , 'application/json')
             self.assertEqual(update_product_response.status_code, HTTPStatus.CREATED)
 

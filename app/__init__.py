@@ -22,6 +22,9 @@ def create_app(config_name):
     from app.api import api_bp
     app.register_blueprint(api_bp)
 
+    from app.routes import routes_bp
+    app.register_blueprint(routes_bp)
+
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)
