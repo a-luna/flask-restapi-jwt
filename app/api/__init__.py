@@ -4,17 +4,21 @@ from flask_restplus import Api
 
 
 _API_DESCRIPTION = (
-    'This free API provides the newest version number and download URL for '
-    'popular software packages and libraries. The idea for this API was '
-    'driven by the need to repeatedly update bash scripts that contain '
-    'hardcoded references to a version number or download URL. Now, instead '
-    'of hardcoding these values, they can be retrieved from this API and '
-    'scripts never have to be updated when a new version is released. To do '
-    'so, send a GET request with the name of a software package (using curl, '
-    'httpie or similar tool), then parse the JSON response (using JQ or '
-    'similar tool) which contains the newest version number of the product '
-    'and a download URL for the newest version. Version information for each '
-    'product is updated every 60 minutes.'
+    'This API does not provide any actual service, this is a live demo of a '
+    'boilerplate Flask-RESTPlus project, detailed in a post on alunablog.com. '
+    'The API is fully functional, however some operations require administrator '
+    'access which cannot be granted through the API. After registering a new '
+    'user or after a successful login, the JSON response will contain a field '
+    'named "Authorization". This field contains an encoded JSON web token '
+    'with the ID of the user and the token expiration time. You should copy '
+    'this value because any method marked with a lock icon requires a '
+    'authorization token. However, only normal users can be created through '
+    'this API, admin users can not be created. Because of this, creating, '
+    'updating and deleting products can only be performed by admin users. '
+    'Regular users can use all "auth" functions, GET "/product" and GET '
+    '"product/{name}" methods. If a regular user attempts to create, update '
+    'or modify a product the API response will be HTTPStatus.UNAUTHORIZED (401) '
+    'with message "You are not authorized to perform the requested action."'
 )
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
@@ -22,7 +26,7 @@ api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
 api = Api(
     api_bp,
     version='1.0',
-    title='Newest Version API',
+    title='Flask-RESTPlus API with JWT-Based Authentication',
     description=_API_DESCRIPTION,
     doc='/ui'
 )
