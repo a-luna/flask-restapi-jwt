@@ -9,12 +9,8 @@ from app.models.user import User
 from app.test.base import BaseTestCase
 
 
-def register_user_happy_path(self):
-    register_response = register_user(
-        self,
-        'new_user@email.com',
-        'new_user',
-        'test1234')
+def register_user_happy_path(self, email, username, password):
+    register_response = register_user(self, email, username, password)
     register_data = register_response.get_json()
     self.assertEqual(register_data['status'], 'success')
     self.assertEqual(register_data['message'], 'Successfully registered.')
@@ -52,16 +48,32 @@ class TestAuthBlueprint(BaseTestCase):
 
     def test_registration(self):
         with self.client:
-            register_user_happy_path(self)
+            email = 'new_user@email.com'
+            username = 'new_user'
+            password = 'test1234'
+            register_user_happy_path(self, email, username, password)
+            new_user = User.find_by_email(email)
+            self.assertIsNotNone(new_user)
+            new_user_repr = (
+                f'User<('
+                    f'public_id={new_user.public_id}, '
+                    f'username={username}, '
+                    f'email={email})>')
+            self.assertEqual(repr(new_user), new_user_repr)
+            try:
+                _ = new_user.password
+            except AttributeError as e:
+                self.assertEqual(repr(e), "AttributeError('password: write-only field',)")
 
-    def test_registration_with_already_registered_user(self):
-        user = User(
-            email='new_user@email.com',
-            username='new_user',
-            password='test1234')
-        db.session.add(user)
-        db.session.commit()
+
+    def test_registration_email_already_registered(self):
         with self.client:
+            user = User(
+                email='new_user@email.com',
+                username='new_user',
+                password='test1234')
+            db.session.add(user)
+            db.session.commit()
             register_response = register_user(
                 self,
                 'new_user@email.com',
@@ -75,12 +87,30 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(register_response.content_type, 'application/json')
             self.assertEqual(register_response.status_code, HTTPStatus.CONFLICT)
 
-    def test_registered_user_login(self):
+    def test_registration_invalid_username(self):
         with self.client:
-            register_user_happy_path(self)
+            register_response = register_user(
+                self,
+                'new_user@email.com',
+                'new user',
+                'test1234')
+            register_data = register_response.get_json()
+            self.assertTrue('errors' in register_data)
+            self.assertTrue('username' in register_data['errors'])
+            self.assertTrue('contains one or more invalid characters' in \
+                register_data['errors']['username'])
+            self.assertEqual(register_data['message'], 'Input payload validation failed')
+            self.assertEqual(register_response.status_code, HTTPStatus.BAD_REQUEST)
+
+    def test_login(self):
+        with self.client:
+            email = 'new_user@email.com'
+            username = 'new_user'
+            password = 'test1234'
+            register_user_happy_path(self, email, username, password)
             login_user_heppy_path(self)
 
-    def test_non_registered_user_login(self):
+    def test_login_email_does_not_exist(self):
         with self.client:
             login_response = login_user(
                 self,
@@ -94,7 +124,10 @@ class TestAuthBlueprint(BaseTestCase):
 
     def test_auth_status(self):
         with self.client:
-            jwt_auth = register_user_happy_path(self)
+            email = 'new_user@email.com'
+            username = 'new_user'
+            password = 'test1234'
+            jwt_auth = register_user_happy_path(self, email, username, password)
             auth_status_response = self.client.get(
                 'api/v1/auth/status',
                 headers=dict(Authorization=f'Bearer {jwt_auth}'))
@@ -107,7 +140,7 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertFalse(auth_status_data['data']['admin'])
             self.assertEqual(auth_status_response.status_code, HTTPStatus.OK)
 
-    def test_auth_status_malformed_bearer_token_1(self):
+    def test_auth_status_malformed_token_1(self):
         with self.client:
             auth_status_response = self.client.get(
                 'api/v1/auth/status',
@@ -117,7 +150,7 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(auth_status_data['message'], 'Invalid token. Please log in again.')
             self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
 
-    def test_auth_status_malformed_bearer_token_2(self):
+    def test_auth_status_malformed_token_2(self):
         with self.client:
             bad_token = (
                 'Bearer eyJ0eXAiOiJKV1QiLCJqbGciOiJIUzI1NiJ9.eyJleHAiOjE1NTMw'
@@ -132,9 +165,29 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(auth_status_data['message'], 'Invalid token. Please log in again.')
             self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
 
-    def test_valid_logout(self):
+    def test_auth_status_token_blacklisted(self):
         with self.client:
-            register_user_happy_path(self)
+            email = 'new_user@email.com'
+            username = 'new_user'
+            password = 'test1234'
+            jwt_auth = register_user_happy_path(self, email, username, password)
+            blacklist_token = BlacklistToken(token=jwt_auth)
+            db.session.add(blacklist_token)
+            db.session.commit()
+            auth_status_response = self.client.get(
+                'api/v1/auth/status',
+                headers=dict(Authorization=f'Bearer {jwt_auth}'))
+            auth_status_data = auth_status_response.get_json()
+            self.assertEqual(auth_status_data['status'], 'fail')
+            self.assertEqual(auth_status_data['message'], 'Token blacklisted. Please log in again.')
+            self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
+
+    def test_logout(self):
+        with self.client:
+            email = 'new_user@email.com'
+            username = 'new_user'
+            password = 'test1234'
+            register_user_happy_path(self, email, username, password)
             jwt_auth = login_user_heppy_path(self)
             logout_response = self.client.post(
                 'api/v1/auth/logout',
@@ -144,9 +197,12 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(logout_data['message'], 'Successfully logged out.')
             self.assertEqual(logout_response.status_code, HTTPStatus.OK)
 
-    def test_invalid_logout(self):
+    def test_logout_auth_token_expired(self):
         with self.client:
-            register_user_happy_path(self)
+            email = 'new_user@email.com'
+            username = 'new_user'
+            password = 'test1234'
+            register_user_happy_path(self, email, username, password)
             jwt_auth = login_user_heppy_path(self)
             time.sleep(6)
             logout_response = self.client.post(
@@ -159,9 +215,12 @@ class TestAuthBlueprint(BaseTestCase):
                 'Authorization token expired. Please log in again.')
             self.assertEqual(logout_response.status_code, HTTPStatus.UNAUTHORIZED)
 
-    def test_valid_blacklisted_token_logout(self):
+    def test_logout_token_blacklisted(self):
         with self.client:
-            register_user_happy_path(self)
+            email = 'new_user@email.com'
+            username = 'new_user'
+            password = 'test1234'
+            register_user_happy_path(self, email, username, password)
             jwt_auth = login_user_heppy_path(self)
             blacklist_token = BlacklistToken(token=jwt_auth)
             db.session.add(blacklist_token)
@@ -173,20 +232,6 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(logout_data['status'], 'fail')
             self.assertEqual(logout_data['message'],'Token blacklisted. Please log in again.')
             self.assertEqual(logout_response.status_code, HTTPStatus.UNAUTHORIZED)
-
-    def test_valid_blacklisted_token_user(self):
-        with self.client:
-            jwt_auth = register_user_happy_path(self)
-            blacklist_token = BlacklistToken(token=jwt_auth)
-            db.session.add(blacklist_token)
-            db.session.commit()
-            auth_status_response = self.client.get(
-                'api/v1/auth/status',
-                headers=dict(Authorization=f'Bearer {jwt_auth}'))
-            auth_status_data = auth_status_response.get_json()
-            self.assertEqual(auth_status_data['status'], 'fail')
-            self.assertEqual(auth_status_data['message'], 'Token blacklisted. Please log in again.')
-            self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
 
 
 if __name__ == '__main__':

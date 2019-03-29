@@ -17,7 +17,7 @@ class BlacklistToken(db.Model):
         self.blacklisted_on = datetime.now(timezone.utc)
 
     def __repr__(self):
-        return f'<id: token: {self.token}>'
+        return f'BlacklistToken<(id={self.id}, token={self.token})>'
 
     @staticmethod
     def check_blacklist(auth_token):

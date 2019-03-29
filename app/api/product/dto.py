@@ -94,7 +94,7 @@ delete_product_parser = reqparse.RequestParser(bundle_errors=True)
 delete_product_parser.add_argument(json_web_token_arg)
 
 product_api_model = product_ns.model(
-    'get_product',
+    'Product',
     {
         'product_name': fields.String(
             required=True,
@@ -134,7 +134,7 @@ pagination_parser.add_argument(
     'per_page',
     type=int,
     required=False,
-    choices=[2, 10, 25, 50, 100],
+    choices=[5, 10, 25, 50, 100],
     default=10,
     help='Results per page {error_msg}'
 )

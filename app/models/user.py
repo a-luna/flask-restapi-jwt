@@ -43,7 +43,7 @@ class User(db.Model):
 
     def __repr__(self):
         return (
-            '<User('
+            'User<('
                 f'public_id={self.public_id}, '
                 f'username={self.username}, '
                 f'email={self.email}'
@@ -64,26 +64,16 @@ class User(db.Model):
 
     def encode_auth_token(self):
         """Generate auth token."""
-        try:
-            now = datetime.utcnow()
-            expire_time = now + timedelta(
-                    hours=current_app.config.get('AUTH_TOKEN_AGE_HOURS'),
-                    minutes=current_app.config.get('AUTH_TOKEN_AGE_MINUTES'),
-                    seconds=5)
-            payload = dict(
-                exp=expire_time,
-                iat=now,
-                sub=self.public_id)
-            return jwt.encode(
-                payload,
-                key,
-                algorithm='HS256')
-        except Exception as e:
-            error = f'Error: {repr(e)}'
-            abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status='fail')
+        now = datetime.utcnow()
+        expire_time = now + timedelta(
+                hours=current_app.config.get('AUTH_TOKEN_AGE_HOURS'),
+                minutes=current_app.config.get('AUTH_TOKEN_AGE_MINUTES'),
+                seconds=5)
+        payload = dict(exp=expire_time, iat=now, sub=self.public_id)
+        return jwt.encode(payload, key, algorithm='HS256')
 
-    @classmethod
-    def decode_auth_token(cls, auth_token):
+    @staticmethod
+    def decode_auth_token(auth_token):
         """Decode the auth token."""
         if auth_token.startswith('Bearer '):
             split = auth_token.split('Bearer')

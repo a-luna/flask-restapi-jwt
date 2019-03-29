@@ -15,10 +15,8 @@ def admin_token_required(f):
         if result.failure:
             abort(HTTPStatus.UNAUTHORIZED, result.error, status='fail')
         auth_token = result.value
-        data, status = get_logged_in_user(auth_token)
+        data, _ = get_logged_in_user(auth_token)
         user_data = data.get('data')
-        if not user_data:
-            return data, status
         admin = user_data.get('admin')
         if not admin:
             error = 'You are not authorized to perform the requested action.'

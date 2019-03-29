@@ -27,9 +27,10 @@ class ProductList(Resource):
     @product_ns.marshal_with(pagination_api_model)
     def get(self):
         """Get a list of all products."""
+        args = pagination_parser.parse_args()
         return ProductModel.query.paginate(
-            request.form.get("page", 1),
-            request.form.get("per_page", 10),
+            args.get("page", 1),
+            args.get("per_page", 10),
             error_out=False
         )
 

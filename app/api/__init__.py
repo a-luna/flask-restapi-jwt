@@ -4,7 +4,7 @@ from flask_restplus import Api
 
 
 _API_DESCRIPTION = (
-    'This API does not provide any actual service, this is a live demo of a '
+    'This API does not provide an actual service, this is a live demo of a '
     'boilerplate Flask-RESTPlus project, detailed in a post on alunablog.com. '
     'The API is fully functional, however some operations require administrator '
     'access which cannot be granted through the API. After registering a new '

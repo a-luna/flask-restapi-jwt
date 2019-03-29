@@ -41,14 +41,6 @@ class Product(db.Model):
         last_update=None,
         last_checked=None
     ):
-        if xpath_version_number is None:
-            xpath_version_number = ""
-        if xpath_download_url is None:
-            xpath_download_url = ""
-        if newest_version_number is None:
-            newest_version_number = ""
-        if download_url is None:
-            download_url = ""
         if last_update is None:
             last_update = datetime.min
         if last_checked is None:
@@ -65,9 +57,9 @@ class Product(db.Model):
 
     def __repr__(self):
         return (
-            '<Product('
-                'id={id},'
-                'product_name={name},'
+            'Product<('
+                'id={id}, '
+                'product_name={name}, '
                 'newest_version_number={version})>'
         ).format(
             id=self.id,

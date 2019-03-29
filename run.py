@@ -3,17 +3,16 @@ import coverage
 import os
 import unittest
 
+import click
+
 COV = coverage.coverage(
     branch=True,
     include='app/*',
     omit=[
-        'app/test/*',
-        'app/config.py'
+        'app/test/*'
     ]
 )
 COV.start()
-
-import click
 
 from app import create_app, db
 from app.config import APP_FOLDER, APP_ROOT

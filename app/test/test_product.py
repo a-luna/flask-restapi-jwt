@@ -62,24 +62,42 @@ def create_regular_user_and_sign_in(self):
     self.assertEqual(login_response.status_code, HTTPStatus.OK)
     return login_data['Authorization']
 
-def create_product_happy_path(self):
-    jwt_auth = create_admin_user_and_sign_in(self)
+def create_product_happy_path(
+        self,
+        product_name,
+        release_info_url,
+        xpath_version_number,
+        xpath_download_url,
+        jwt_auth):
     create_product_response = create_product(
         self,
-        'python_v3_7',
-        'https://www.python.org/downloads/',
-        '//p[@class="download-buttons"]/a/text()',
-        '//p[@class="download-buttons"]/a/@href',
+        product_name,
+        release_info_url,
+        xpath_version_number,
+        xpath_download_url,
         jwt_auth)
     create_product_data = create_product_response.get_json()
     self.assertEqual(create_product_data['status'], 'success')
-    self.assertEqual(create_product_data['message'], 'New product added: python_v3_7.')
-    self.assertEqual(create_product_data['location'], '/api/v1/product/python_v3_7')
+    self.assertEqual(create_product_data['message'], f'New product added: {product_name}.')
+    self.assertEqual(create_product_data['location'], f'/api/v1/product/{product_name}')
     self.assertEqual(create_product_response.content_type, 'application/json')
     self.assertEqual(create_product_response.status_code, HTTPStatus.CREATED)
-    product = Product.find_by_name('python_v3_7')
+    product = Product.find_by_name(product_name)
     self.assertIsNotNone(product)
+    return product
 
+def create_product_python(self, jwt_auth):
+    product_name = 'python_v3_7'
+    release_info_url = 'https://www.python.org/downloads/'
+    xpath_download_url = '//p[@class="download-buttons"]/a/text()'
+    xpath_version_number = '//p[@class="download-buttons"]/a/@href'
+    product = create_product_happy_path(
+        self,
+        product_name,
+        release_info_url,
+        xpath_download_url,
+        xpath_version_number,
+        jwt_auth)
     newest_version = '3.7.2'
     download_url = 'https://www.python.org/ftp/python/3.7.2/python-3.7.2-macosx10.9.pkg'
     check_time = datetime.utcnow()
@@ -92,16 +110,24 @@ def create_product_happy_path(self):
     product.last_update = update_time
     db.session.commit()
 
-    retrieve_product_response = retrieve_product(self, 'python_v3_7')
+    retrieve_product_response = retrieve_product(self, product_name)
     retrieve_product_data = retrieve_product_response.get_json()
-    self.assertEqual(retrieve_product_data['product_name'], 'python_v3_7')
+    self.assertEqual(retrieve_product_data['product_name'], product_name)
     self.assertEqual(retrieve_product_data['newest_version_number'], newest_version)
     self.assertEqual(retrieve_product_data['download_url'], download_url)
     self.assertEqual(retrieve_product_data['last_checked_utc_iso'], check_time_str)
     self.assertEqual(retrieve_product_data['last_update_utc_iso'], update_time_str)
     self.assertEqual(retrieve_product_response.content_type, 'application/json')
     self.assertEqual(retrieve_product_response.status_code, HTTPStatus.OK)
-    return product, jwt_auth
+
+    product = Product.find_by_name(product_name)
+    product_repr = (
+        f'Product<('
+            f'id=1, '
+            f'product_name={product_name}, '
+            f'newest_version_number={newest_version})>')
+    self.assertEqual(repr(product), product_repr)
+    return product
 
 def create_product(
     self,
@@ -124,6 +150,10 @@ def create_product(
 
 def retrieve_product(self, product_name):
     return self.client.get(f'api/v1/product/{product_name}')
+
+def retrieve_all_products(self, page_num, per_page):
+    query = f'page={page_num}&per_page={per_page}'
+    return self.client.get(f'api/v1/product/?{query}')
 
 def update_product(
     self,
@@ -154,7 +184,8 @@ class TestProductBlueprint(BaseTestCase):
 
     def test_create_product(self):
         with self.client:
-            create_product_happy_path(self)
+            jwt_auth = create_admin_user_and_sign_in(self)
+            create_product_python(self, jwt_auth)
 
     def test_create_product_already_exists(self):
         product = Product(
@@ -198,6 +229,113 @@ class TestProductBlueprint(BaseTestCase):
             self.assertEqual(create_product_data['message'], 'Input payload validation failed')
             self.assertEqual(create_product_response.status_code, HTTPStatus.BAD_REQUEST)
 
+    def test_create_product_invalid_xpath(self):
+        with self.client:
+            jwt_auth = create_admin_user_and_sign_in(self)
+            product_name = 'python_v3_7'
+            release_info_url = 'https://www.python.org/downloads/'
+            xpath_version_number = '      '
+            request_data = (
+                f'product_name={product_name}&'
+                f'release_info_url={release_info_url}&'
+                f'xpath_version_number={xpath_version_number}')
+            create_product_response =  self.client.post(
+                'api/v1/product/',
+                headers=dict(Authorization=f'Bearer {jwt_auth}'),
+                data=request_data,
+                content_type='application/x-www-form-urlencoded')
+            create_product_data = create_product_response.get_json()
+            self.assertTrue('errors' in create_product_data)
+            self.assertTrue('xpath_version_number' in create_product_data['errors'])
+            self.assertTrue('xpath_download_url' in create_product_data['errors'])
+            self.assertTrue('XPath query must not be null or empty string.',
+                create_product_data['errors']['xpath_version_number'])
+            self.assertEqual('Missing required parameter in the post body',
+                create_product_data['errors']['xpath_download_url'])
+            self.assertEqual(create_product_data['message'], 'Input payload validation failed')
+            self.assertEqual(create_product_response.status_code, HTTPStatus.BAD_REQUEST)
+
+    def test_retrieve_all_products(self):
+        jwt_auth = create_admin_user_and_sign_in(self)
+        product_python = create_product_python(self, jwt_auth)
+        product_1 = create_product_happy_path(
+            self,
+            'product_1',
+            'https://www.prod1.com',
+            '//prod[1]/text()',
+            '//prod[1]/@href',
+            jwt_auth)
+        product_2 = create_product_happy_path(
+            self,
+            'product_2',
+            'https://www.prod2.com',
+            '//prod[2]/text()',
+            '//prod[2]/@href',
+            jwt_auth)
+        product_3 = create_product_happy_path(
+            self,
+            'product_3',
+            'https://www.prod3.com',
+            '//prod[3]/text()',
+            '//prod[3]/@href',
+            jwt_auth)
+        product_4 = create_product_happy_path(
+            self,
+            'product_4',
+            'https://www.prod4.com',
+            '//prod[4]/text()',
+            '//prod[4]/@href',
+            jwt_auth)
+        product_5 = create_product_happy_path(
+            self,
+            'product_5',
+            'https://www.prod5.com',
+            '//prod[5]/text()',
+            '//prod[5]/@href',
+            jwt_auth)
+        product_6 = create_product_happy_path(
+            self,
+            'product_6',
+            'https://www.prod6.com',
+            '//prod[6]/text()',
+            '//prod[6]/@href',
+            jwt_auth)
+        retrive_products_response = retrieve_all_products(self, 1, 5)
+        retrive_products_data = retrive_products_response.get_json()
+        self.assertEqual(retrive_products_data['page'], 1)
+        self.assertEqual(retrive_products_data['total_pages'], 2)
+        self.assertEqual(retrive_products_data['items_per_page'], 5)
+        self.assertEqual(retrive_products_data['total_items'], 7)
+        self.assertEqual(retrive_products_data['items'][0]['product_name'], 'python_v3_7')
+        self.assertEqual(retrive_products_data['items'][1]['product_name'], 'product_1')
+        self.assertEqual(retrive_products_data['items'][2]['product_name'], 'product_2')
+        self.assertEqual(retrive_products_data['items'][3]['product_name'], 'product_3')
+        self.assertEqual(retrive_products_data['items'][4]['product_name'], 'product_4')
+
+        retrive_products_response = retrieve_all_products(self, 2, 5)
+        retrive_products_data = retrive_products_response.get_json()
+        self.assertEqual(retrive_products_data['page'], 2)
+        self.assertEqual(retrive_products_data['total_pages'], 2)
+        self.assertEqual(retrive_products_data['items_per_page'], 5)
+        self.assertEqual(retrive_products_data['total_items'], 7)
+        self.assertEqual(retrive_products_data['items'][0]['product_name'], 'product_5')
+        self.assertEqual(retrive_products_data['items'][1]['product_name'], 'product_6')
+
+        retrive_products_response = retrieve_all_products(self, 1, 10)
+        retrive_products_data = retrive_products_response.get_json()
+        self.assertEqual(retrive_products_data['page'], 1)
+        self.assertEqual(retrive_products_data['total_pages'], 1)
+        self.assertEqual(retrive_products_data['items_per_page'], 10)
+        self.assertEqual(retrive_products_data['total_items'], 7)
+        self.assertEqual(retrive_products_data['items'][0]['product_name'], 'python_v3_7')
+        self.assertEqual(retrive_products_data['items'][1]['product_name'], 'product_1')
+        self.assertEqual(retrive_products_data['items'][2]['product_name'], 'product_2')
+        self.assertEqual(retrive_products_data['items'][3]['product_name'], 'product_3')
+        self.assertEqual(retrive_products_data['items'][4]['product_name'], 'product_4')
+        self.assertEqual(retrive_products_data['items'][5]['product_name'], 'product_5')
+        self.assertEqual(retrive_products_data['items'][6]['product_name'], 'product_6')
+
+
     def test_retrieve_product_does_not_exist(self):
         with self.client:
             retrieve_product_response = retrieve_product(self, 'python_v3_7')
@@ -210,7 +348,8 @@ class TestProductBlueprint(BaseTestCase):
 
     def test_update_product(self):
         with self.client:
-            product, jwt_auth = create_product_happy_path(self)
+            jwt_auth = create_admin_user_and_sign_in(self)
+            product = create_product_python(self, jwt_auth)
             updated_url = 'http://www.test.com'
             updated_xpath_1 = '//table/tr//td/text()'
             updated_xpath_2 = '//div//a/@href'
@@ -249,7 +388,8 @@ class TestProductBlueprint(BaseTestCase):
 
     def test_delete_product(self):
         with self.client:
-            product, jwt_auth = create_product_happy_path(self)
+            jwt_auth = create_admin_user_and_sign_in(self)
+            product = create_product_python(self, jwt_auth)
             delete_product_response = delete_product(
                 self,
                 product.product_name,
@@ -287,7 +427,8 @@ class TestProductBlueprint(BaseTestCase):
 
     def test_update_product_admin_token_requred(self):
         with self.client:
-            product, jwt_auth = create_product_happy_path(self)
+            jwt_auth = create_admin_user_and_sign_in(self)
+            product = create_product_python(self, jwt_auth)
             logout_response = self.client.post(
                 'api/v1/auth/logout',
                 headers=dict(Authorization=f'Bearer {jwt_auth}'))
@@ -318,7 +459,8 @@ class TestProductBlueprint(BaseTestCase):
 
         def test_delete_product_admin_token_requred(self):
             with self.client:
-                product, jwt_auth = create_product_happy_path(self)
+                jwt_auth = create_admin_user_and_sign_in(self)
+                product = create_product_python(self, jwt_auth)
                 logout_response = self.client.post(
                     'api/v1/auth/logout',
                     headers=dict(Authorization=f'Bearer {jwt_auth}'))
