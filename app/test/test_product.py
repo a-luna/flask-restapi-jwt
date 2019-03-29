@@ -7,7 +7,7 @@ from app.models.product import Product
 from app.models.user import User
 from app.test.base import BaseTestCase
 from app.test.test_auth import register_user, login_user
-from app.util.dt_format_strings import DT_FORMAT_ISO
+from app.util.dt_format_strings import DT_STR_FORMAT_ISO
 
 
 def create_admin_user_and_sign_in(self):
@@ -102,8 +102,8 @@ def create_product_python(self, jwt_auth):
     download_url = 'https://www.python.org/ftp/python/3.7.2/python-3.7.2-macosx10.9.pkg'
     check_time = datetime.utcnow()
     update_time = datetime.utcnow() + timedelta(seconds=3)
-    check_time_str = check_time.replace(tzinfo=timezone.utc).strftime(DT_FORMAT_ISO)
-    update_time_str = update_time.replace(tzinfo=timezone.utc).strftime(DT_FORMAT_ISO)
+    check_time_str = check_time.replace(tzinfo=timezone.utc).strftime(DT_STR_FORMAT_ISO)
+    update_time_str = update_time.replace(tzinfo=timezone.utc).strftime(DT_STR_FORMAT_ISO)
     product.newest_version_number = newest_version
     product.download_url = download_url
     product.last_checked = check_time

@@ -15,7 +15,7 @@ from app.models.product import Product as ProductModel
 
 
 @product_ns.route("/")
-@product_ns.doc(responses={400: "Validation error."})
+@product_ns.doc(responses={400: 'Validation error.'})
 class ProductList(Resource):
     "Handlers for HTTP requests to /product API endpoints."
 
@@ -40,7 +40,7 @@ class ProductList(Resource):
         parser=post_product_parser,
         validate=True,
         responses={
-            201: "Product successfully added.",
+            201: "Product was added.",
             401: "Admin token required.",
             409: "Product name already exists, must be unique.",
             500: "Internal server error."})
@@ -53,7 +53,7 @@ class ProductList(Resource):
 
 @product_ns.route("/<name>")
 @product_ns.param("name", "Product name")
-@product_ns.doc(responses={400: "Validation error."})
+@product_ns.doc(responses={400: 'Validation error.'})
 class Product(Resource):
     "Handlers for HTTP requests to /product/{name} API endpoints."
 
@@ -73,10 +73,10 @@ class Product(Resource):
         parser=put_product_parser,
         validate=True,
         responses={
-            200: "Successfully updated product.",
-            201: "Product successfully added.",
-            401: "Admin token required.",
-            500: "Internal server error."})
+            200: "Product was updated.",
+            201: "Product was added.",
+            401: "Admin token required, please login.",
+            500: 'Internal server error.'})
     @admin_token_required
     def put(self, name):
         """Update an existing product."""
@@ -89,9 +89,8 @@ class Product(Resource):
         parser=delete_product_parser,
         validate=True,
         responses={
-            204: "Successfully deleted product.",
-            401: "Operation requires administrator access, please login.",
-            500: "Internal server error."})
+            204: "Product was deleted.",
+            401: "Admin token required, please login."})
     def delete(self, name):
         """Delete a product."""
         return delete_product(name)

@@ -4,12 +4,12 @@ from flask_restplus.reqparse import Argument
 from flask_restplus.inputs import URL
 
 from app.api.product import product_ns
-from app.util.regex import DB_OBJECT_NAME_PATTERN, DB_OBJECT_NAME_REGEX
+from app.util.regex import DB_NAME_PATTERN, DB_NAME_REGEX
 
 
 def product_name(name):
     """Return name if valid, raise an excaption if validation fails."""
-    if DB_OBJECT_NAME_REGEX.match(name):
+    if DB_NAME_REGEX.match(name):
         return name
     else:
         raise ValueError(
@@ -99,7 +99,7 @@ product_api_model = product_ns.model(
         'product_name': fields.String(
             required=True,
             min_length=3,
-            pattern=DB_OBJECT_NAME_PATTERN
+            pattern=DB_NAME_PATTERN
         ),
         'newest_version_number': fields.String(
             readonly=True,

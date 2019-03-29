@@ -4,21 +4,21 @@ from flask_restplus import Api
 
 
 _API_DESCRIPTION = (
-    'This API does not provide an actual service, this is a live demo of a '
-    'boilerplate Flask-RESTPlus project, detailed in a post on alunablog.com. '
-    'The API is fully functional, however some operations require administrator '
-    'access which cannot be granted through the API. After registering a new '
-    'user or after a successful login, the JSON response will contain a field '
-    'named "Authorization". This field contains an encoded JSON web token '
-    'with the ID of the user and the token expiration time. You should copy '
-    'this value because any method marked with a lock icon requires a '
-    'authorization token. However, only normal users can be created through '
-    'this API, admin users can not be created. Because of this, creating, '
-    'updating and deleting products can only be performed by admin users. '
-    'Regular users can use all "auth" functions, GET "/product" and GET '
-    '"product/{name}" methods. If a regular user attempts to create, update '
-    'or modify a product the API response will be HTTPStatus.UNAUTHORIZED (401) '
-    'with message "You are not authorized to perform the requested action."'
+    '<p>This API does not provide an actual service, this is a live demo of a '
+    'boilerplate Flask-RESTPlus project, detailed in a post on '
+    '<a href="https://www.alunablog.com" target="_blank">alunablog.com.</a></p>'
+    '<p>The API is fully functional, however some operations require administrator '
+    'access which cannot be granted through the API. After registering a new user '
+    'or after a successful login, the JSON response will contain a field named '
+    '<strong>Authorization</strong>. This field contains an encoded JSON web token '
+    'with the ID of the user and the token expiration time. You should copy this '
+    'value because any method marked with a lock icon requires a valid authorization '
+    'token. However, some API endpoints require a valid authorization token AND '
+    'administrator privileges. These endpoints are: <strong>POST</strong>, '
+    '<strong>PUT</strong> and <strong>DELETE</strong> <strong>product/{name}</strong>. '
+    'Regular users can use all <strong>/auth</strong> endpoints, as well as '
+    '<strong>GET</strong> <strong>/product</strong> and <strong>GET</strong> '
+    '<strong>product/{name}</strong> endpoints.</p>'
 )
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')

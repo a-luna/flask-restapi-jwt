@@ -3,12 +3,12 @@ from flask_restplus import reqparse
 from flask_restplus.reqparse import Argument
 from flask_restplus.inputs import email
 
-from app.util.regex import DB_OBJECT_NAME_REGEX
+from app.util.regex import DB_NAME_REGEX
 
 
 def username(name):
     """Return username if valid, raise an excaption if validation fails."""
-    if DB_OBJECT_NAME_REGEX.match(name):
+    if DB_NAME_REGEX.match(name):
         return name
     else:
         raise ValueError(

@@ -17,7 +17,7 @@ class Config:
     if Path(DOTENV_PATH).is_file():
         load_dotenv(DOTENV_PATH)
     SECRET_KEY = os.getenv('SECRET_KEY', 'open_sesame')
-    DEBUG = True
+    DEBUG = False
     TESTING = False
     BCRYPT_LOG_ROUNDS = 13
     AUTH_TOKEN_AGE_HOURS = 0
@@ -25,12 +25,12 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     SWAGGER_UI_DOC_EXPANSION = 'list'
-    RESTPLUS_VALIDATE = True
     RESTPLUS_MASK_SWAGGER = False
 
 class DevelopmentConfig(Config):
     """Development configuration."""
 
+    DEBUG = True
     BCRYPT_LOG_ROUNDS = 4
     AUTH_TOKEN_AGE_MINUTES = 15
     SQLALCHEMY_DATABASE_URI = DB_URL_DEV
@@ -38,6 +38,7 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     """Testing configuration."""
 
+    DEBUG = True
     TESTING = True
     BCRYPT_LOG_ROUNDS = 4
     SQLALCHEMY_DATABASE_URI = DB_URL_TEST
@@ -45,7 +46,6 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Production configuration."""
 
-    DEBUG = False
     AUTH_TOKEN_AGE_HOURS = 1
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', DB_URL_SQLITE)
     PRESERVE_CONTEXT_ON_EXCEPTION = True

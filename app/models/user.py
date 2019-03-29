@@ -12,7 +12,6 @@ from app import db, bcrypt
 from app.config import key
 from app.models.blacklist_token import BlacklistToken
 from app.util.dt_format_strings import DT_STR_FORMAT_NAIVE
-from app.util.jwt_functions import get_auth_token
 from app.util.result import Result
 
 
