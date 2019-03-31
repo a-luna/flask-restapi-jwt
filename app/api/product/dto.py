@@ -15,11 +15,7 @@ def product_name(name):
         raise ValueError(
             f'"{name}" contains one or more invalid characters. Product name '
             'must contain only letters (a-z), numbers (0-9), "-" (hyphen '
-            'character) and/or "_" (underscore character).'
-        )
-
-    # Swagger documntation
-    product_name.__schema__ = {'type': 'string', 'format': 'product_name'}
+            'character) and/or "_" (underscore character).')
 
 
 def xpath_query(xpath):
@@ -29,69 +25,62 @@ def xpath_query(xpath):
     else:
         raise ValueError('XPath query must not be null or empty string.')
 
-    # Swagger documntation
-    xpath_query.__schema__ = {'type': 'string', 'format': 'xpath_query'}
-
-json_web_token_arg = Argument(
-    name='Authorization',
-    dest='Authorization',
-    location='headers',
-    required=True,
-    nullable=False
-)
-
-product_name_arg = Argument(
+post_product_parser = reqparse.RequestParser(bundle_errors=True)
+post_product_parser.add_argument(
     name='product_name',
     dest='product_name',
     type=product_name,
     location='form',
     required=True,
     nullable=False,
-    case_sensitive=False
-)
-
-release_info_url_arg = Argument(
+    case_sensitive=False)
+post_product_parser.add_argument(
     name='release_info_url',
     dest='release_info_url',
     type=URL(schemes=['http', 'https']),
     location='form',
     required=True,
-    nullable=False
-)
-
-xpath_version_number_arg = Argument(
+    nullable=False)
+post_product_parser.add_argument(
     name='xpath_version_number',
     dest='xpath_version_number',
     type=xpath_query,
     location='form',
     required=True,
-    nullable=False
-)
-
-xpath_download_url_arg = Argument(
+    nullable=False)
+post_product_parser.add_argument(
     name='xpath_download_url',
     dest='xpath_download_url',
     type=xpath_query,
     location='form',
     required=True,
-    nullable=False
-)
-
-post_product_parser = reqparse.RequestParser(bundle_errors=True)
-post_product_parser.add_argument(json_web_token_arg)
-post_product_parser.add_argument(product_name_arg)
-post_product_parser.add_argument(release_info_url_arg)
-post_product_parser.add_argument(xpath_version_number_arg)
-post_product_parser.add_argument(xpath_download_url_arg)
+    nullable=False)
 
 put_product_parser = reqparse.RequestParser(bundle_errors=True)
-put_product_parser.add_argument(json_web_token_arg)
-put_product_parser.add_argument(release_info_url_arg)
-put_product_parser.add_argument(xpath_version_number_arg)
-put_product_parser.add_argument(xpath_download_url_arg)
-
-delete_product_parser = reqparse.RequestParser(bundle_errors=True)
-delete_product_parser.add_argument(json_web_token_arg)
+put_product_parser.add_argument(
+    name='release_info_url',
+    dest='release_info_url',
+    type=URL(schemes=['http', 'https']),
+    location='form',
+    required=False,
+    nullable=False,
+    store_missing=False)
+put_product_parser.add_argument(
+    name='xpath_version_number',
+    dest='xpath_version_number',
+    type=xpath_query,
+    location='form',
+    required=False,
+    nullable=False,
+    store_missing=False)
+put_product_parser.add_argument(
+    name='xpath_download_url',
+    dest='xpath_download_url',
+    type=xpath_query,
+    location='form',
+    required=False,
+    nullable=False,
+    store_missing=False)
 
 product_api_model = product_ns.model(
     'Product',
@@ -99,28 +88,21 @@ product_api_model = product_ns.model(
         'product_name': fields.String(
             required=True,
             min_length=3,
-            pattern=DB_NAME_PATTERN
-        ),
+            pattern=DB_NAME_PATTERN),
         'newest_version_number': fields.String(
             readonly=True,
-            required=False
-        ),
+            required=False),
         'download_url': fields.String(
             readonly=True,
-            required=False
-        ),
+            required=False),
         'last_checked_utc_iso': fields.String(
             default='',
             readonly=True,
-            required=False
-        ),
+            required=False),
         'last_update_utc_iso': fields.String(
             default='',
             readonly=True,
-            required=False
-        )
-    }
-)
+            required=False)})
 
 pagination_parser = reqparse.RequestParser(bundle_errors=True)
 pagination_parser.add_argument(
@@ -128,35 +110,27 @@ pagination_parser.add_argument(
     type=int,
     required=False,
     default=1,
-    help='Page number'
-)
+    help='Page number')
 pagination_parser.add_argument(
     'per_page',
     type=int,
     required=False,
     choices=[5, 10, 25, 50, 100],
     default=10,
-    help='Results per page {error_msg}'
-)
+    help='Results per page {error_msg}')
 
 pagination_api_model = product_ns.model(
     'Pagination', {
         'page': fields.Integer(
             description='Number of this page of results',
-            attribute='page'
-        ),
+            attribute='page'),
         'total_pages': fields.Integer(
             description='Total number of pages of results',
-            attribute='pages'
-        ),
+            attribute='pages'),
         'items_per_page': fields.Integer(
             description='Number of items per page of results',
-            attribute='per_page'
-        ),
+            attribute='per_page'),
         'total_items': fields.Integer(
             description='Total number of results',
-            attribute='total'
-        ),
-        'items': fields.List(fields.Nested(product_api_model))
-    }
-)
+            attribute='total'),
+        'items': fields.List(fields.Nested(product_api_model))})

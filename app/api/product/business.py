@@ -25,8 +25,7 @@ def create_product(data):
     try:
         product_dict = {}
         for k, v in data.items():
-            if k is not 'Authorization':
-                product_dict[k] = v
+            product_dict[k] = v
         product_dict['last_update'] = datetime.utcnow()
         new_product = Product(**product_dict)
         db.session.add(new_product)
@@ -43,24 +42,24 @@ def create_product(data):
 
 def update_product(product_name, data):
     request_data = {k:v for k,v in data.items()}
-    updated = Product.find_by_name(product_name)
-    if not updated:
-        request_data['product_name'] = product_name
-        return create_product(request_data)
+    update_product = Product.find_by_name(product_name)
+    if not update_product:
+        error = f'Product name: {product_name} not found.'
+        abort(HTTPStatus.NOT_FOUND, error, status='fail')
     try:
         for k, v in request_data.items():
-            setattr(updated, k, v)
-        setattr(updated, 'last_update', datetime.utcnow())
+            setattr(update_product, k, v)
+        setattr(update_product, 'last_update', datetime.utcnow())
         db.session.commit()
         product_data = dict(
-            product_name=updated.product_name,
-            release_info_url=updated.release_info_url,
-            xpath_version_number=updated.xpath_version_number,
-            xpath_download_url=updated.xpath_download_url,
-            newest_version_number=updated.newest_version_number,
-            download_url=updated.download_url,
-            last_update=updated.last_update_utc_iso,
-            last_checked=updated.last_checked_utc_iso)
+            product_name=update_product.product_name,
+            release_info_url=update_product.release_info_url,
+            xpath_version_number=update_product.xpath_version_number,
+            xpath_download_url=update_product.xpath_download_url,
+            newest_version_number=update_product.newest_version_number,
+            download_url=update_product.download_url,
+            last_update=update_product.last_update_utc_iso,
+            last_checked=update_product.last_checked_utc_iso)
         response_data = dict(
             status='success',
             data=product_data)

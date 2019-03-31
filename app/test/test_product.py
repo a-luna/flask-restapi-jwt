@@ -225,7 +225,8 @@ class TestProductBlueprint(BaseTestCase):
             create_product_data = create_product_response.get_json()
             self.assertTrue('errors' in create_product_data)
             self.assertTrue('product_name' in create_product_data['errors'])
-            self.assertTrue('contains one or more invalid characters' in create_product_data['errors']['product_name'])
+            self.assertTrue('contains one or more invalid characters' in \
+                create_product_data['errors']['product_name'])
             self.assertEqual(create_product_data['message'], 'Input payload validation failed')
             self.assertEqual(create_product_response.status_code, HTTPStatus.BAD_REQUEST)
 
@@ -380,11 +381,10 @@ class TestProductBlueprint(BaseTestCase):
                 '//p[@class="download-buttons"]/a/@href',
                 jwt_auth)
             update_product_data = update_product_response.get_json()
-            self.assertEqual(update_product_data['status'], 'success')
-            self.assertEqual(update_product_data['message'], 'New product added: python_v3_7.')
-            self.assertEqual(update_product_data['location'], '/api/v1/product/python_v3_7')
+            self.assertEqual(update_product_data['status'], 'fail')
+            self.assertTrue(update_product_data['message'].startswith('Product name: python_v3_7 not found.'))
             self.assertEqual(update_product_response.content_type , 'application/json')
-            self.assertEqual(update_product_response.status_code, HTTPStatus.CREATED)
+            self.assertEqual(update_product_response.status_code, HTTPStatus.NOT_FOUND)
 
     def test_delete_product(self):
         with self.client:

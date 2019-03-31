@@ -182,6 +182,14 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(auth_status_data['message'], 'Token blacklisted. Please log in again.')
             self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
 
+    def test_auth_status_no_token(self):
+        with self.client:
+            auth_status_response = self.client.get('api/v1/auth/status')
+            auth_status_data = auth_status_response.get_json()
+            self.assertEqual(auth_status_data['status'], 'fail')
+            self.assertEqual(auth_status_data['message'], 'Invalid token. Please log in again.')
+            self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
+
     def test_logout(self):
         with self.client:
             email = 'new_user@email.com'
@@ -223,6 +231,11 @@ class TestAuthBlueprint(BaseTestCase):
             register_user_happy_path(self, email, username, password)
             jwt_auth = login_user_heppy_path(self)
             blacklist_token = BlacklistToken(token=jwt_auth)
+            token_repr = (f'BlacklistToken<('
+                            f'id={blacklist_token.id}, '
+                            f'token={blacklist_token.token})>')
+            self.assertEqual(repr(blacklist_token), token_repr)
+
             db.session.add(blacklist_token)
             db.session.commit()
             logout_response = self.client.post(
@@ -231,6 +244,14 @@ class TestAuthBlueprint(BaseTestCase):
             logout_data = logout_response.get_json()
             self.assertEqual(logout_data['status'], 'fail')
             self.assertEqual(logout_data['message'],'Token blacklisted. Please log in again.')
+            self.assertEqual(logout_response.status_code, HTTPStatus.UNAUTHORIZED)
+
+    def test_logout_no_token(self):
+        with self.client:
+            logout_response = self.client.post('api/v1/auth/logout')
+            logout_data = logout_response.get_json()
+            self.assertEqual(logout_data['status'], 'fail')
+            self.assertEqual(logout_data['message'], 'Invalid token. Please log in again.')
             self.assertEqual(logout_response.status_code, HTTPStatus.UNAUTHORIZED)
 
 

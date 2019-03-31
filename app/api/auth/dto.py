@@ -16,9 +16,6 @@ def username(name):
             'must contain only letters (a-z), numbers (0-9), "-" (hyphen '
             'character) and/or "_" (underscore character).')
 
-    # Swagger documentation
-    username.__schema__ = {'type': 'string', 'format': 'username'}
-
 email_arg = Argument(
     name='email',
     dest='email',
@@ -59,9 +56,6 @@ auth_token_arg = Argument(
 login_reqparser = reqparse.RequestParser(bundle_errors=True)
 login_reqparser.add_argument(email_arg)
 login_reqparser.add_argument(password_arg)
-
-token_reqparser = reqparse.RequestParser()
-token_reqparser.add_argument(auth_token_arg)
 
 user_reqparser = reqparse.RequestParser(bundle_errors=True)
 user_reqparser.add_argument(email_arg)

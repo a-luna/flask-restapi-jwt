@@ -1,6 +1,7 @@
 from datetime import datetime
-
 from http import HTTPStatus
+
+from flask import request
 from flask_restplus import abort
 
 from app import db
@@ -53,7 +54,11 @@ def process_login(data):
         abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
 
 
-def process_logout(auth_token):
+def process_logout():
+    auth_token = request.headers.get('Authorization')
+    if not auth_token:
+        error = 'Invalid token. Please log in again.'
+        abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
     result = User.decode_auth_token(auth_token)
     if result.failure:
         abort(HTTPStatus.UNAUTHORIZED, result.error, status='fail')
@@ -71,7 +76,11 @@ def process_logout(auth_token):
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status='fail')
 
 
-def get_logged_in_user(auth_token):
+def get_logged_in_user():
+        auth_token = request.headers.get('Authorization')
+        if not auth_token:
+            error = 'Invalid token. Please log in again.'
+            abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
         result = User.decode_auth_token(auth_token)
         if result.failure:
             abort(HTTPStatus.UNAUTHORIZED, result.error, status='fail')
@@ -79,8 +88,9 @@ def get_logged_in_user(auth_token):
         user_public_id = result.value
         user = User.find_by_public_id(user_public_id)
         user_data = dict(
-            user_id=user.id,
+            user_id=user.public_id,
             email=user.email,
+            username=user.username,
             admin=user.admin,
             registered_on=user.registered_on_str)
         response_dict = dict(

@@ -18,18 +18,23 @@ _API_DESCRIPTION = (
     '<strong>PUT</strong> and <strong>DELETE</strong> <strong>product/{name}</strong>. '
     'Regular users can use all <strong>/auth</strong> endpoints, as well as '
     '<strong>GET</strong> <strong>/product</strong> and <strong>GET</strong> '
-    '<strong>product/{name}</strong> endpoints.</p>'
-)
+    '<strong>product/{name}</strong> endpoints.</p>')
 
 api_bp = Blueprint('api', __name__, url_prefix='/api/v1')
+
+authorizations = {
+    'Bearer': {
+        'type': 'apiKey',
+        'in': 'header',
+        'name': 'Authorization'}}
 
 api = Api(
     api_bp,
     version='1.0',
     title='Flask-RESTPlus API with JWT-Based Authentication',
     description=_API_DESCRIPTION,
-    doc='/ui'
-)
+    doc='/ui',
+    authorizations=authorizations)
 
 
 from app.api.auth import auth_ns
