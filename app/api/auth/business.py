@@ -32,6 +32,8 @@ def generate_token(user):
         response_data = dict(
             status='success',
             message='Successfully registered.',
+            email=user.email,
+            public_id=user.public_id,
             Authorization=auth_token.decode())
         return response_data, HTTPStatus.CREATED
     except Exception as e:
@@ -87,14 +89,5 @@ def get_logged_in_user():
 
         user_public_id = result.value
         user = User.find_by_public_id(user_public_id)
-        user_data = dict(
-            user_id=user.public_id,
-            email=user.email,
-            username=user.username,
-            admin=user.admin,
-            registered_on=user.registered_on_str)
-        response_dict = dict(
-            status='success',
-            data=user_data)
-        return response_dict, HTTPStatus.OK
+        return user, HTTPStatus.OK
 

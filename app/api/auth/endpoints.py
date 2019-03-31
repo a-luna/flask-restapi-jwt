@@ -5,7 +5,7 @@ from flask import request
 from flask_restplus import Resource
 
 from app.api.auth import auth_ns
-from app.api.auth.dto import login_reqparser, user_reqparser
+from app.api.auth.dto import login_reqparser, user_reqparser, user_model
 from app.api.auth.business import (
     register_new_user, process_login, process_logout, get_logged_in_user
 )
@@ -13,10 +13,10 @@ from app.api.auth.business import (
 
 @auth_ns.route('/register')
 @auth_ns.doc(responses={
-    HTTPStatus.BAD_REQUEST: 'Validation error.',
-    HTTPStatus.INTERNAL_SERVER_ERROR: 'Internal server error.',
     HTTPStatus.CREATED: 'New user was successfully created.',
-    HTTPStatus.CONFLICT: 'Email address is already registered.'})
+    HTTPStatus.BAD_REQUEST: 'Validation error.',
+    HTTPStatus.CONFLICT: 'Email address is already registered.',
+    HTTPStatus.INTERNAL_SERVER_ERROR: 'Internal server error.'})
 class RegisterUser(Resource):
     """Register a new user."""
 
@@ -30,10 +30,10 @@ class RegisterUser(Resource):
 
 @auth_ns.route('/login')
 @auth_ns.doc(responses={
-    HTTPStatus.BAD_REQUEST: 'Validation error.',
-    HTTPStatus.INTERNAL_SERVER_ERROR: 'Internal server error.',
     HTTPStatus.OK: 'Login succeeded.',
-    HTTPStatus.UNAUTHORIZED: 'Email or password does not match.'})
+    HTTPStatus.BAD_REQUEST: 'Validation error.',
+    HTTPStatus.UNAUTHORIZED: 'Email or password does not match.',
+    HTTPStatus.INTERNAL_SERVER_ERROR: 'Internal server error.'})
 class LoginUser(Resource):
     """User Login Resource."""
 
@@ -48,10 +48,10 @@ class LoginUser(Resource):
 @auth_ns.route('/logout')
 @auth_ns.doc(
     responses={
-    HTTPStatus.BAD_REQUEST: 'Validation error.',
-    HTTPStatus.INTERNAL_SERVER_ERROR: 'Internal server error.',
     HTTPStatus.OK: 'Log out succeeded, token is no longer valid.',
-    HTTPStatus.UNAUTHORIZED: 'Token is invalid or expired.'})
+    HTTPStatus.BAD_REQUEST: 'Validation error.',
+    HTTPStatus.UNAUTHORIZED: 'Token is invalid or expired.',
+    HTTPStatus.INTERNAL_SERVER_ERROR: 'Internal server error.'})
 class LogoutUser(Resource):
     """Logout Resource."""
 
@@ -65,12 +65,15 @@ class LogoutUser(Resource):
 @auth_ns.doc(
     responses={
     HTTPStatus.BAD_REQUEST: 'Validation error.',
-    HTTPStatus.OK: 'Token is currently valid.',
     HTTPStatus.UNAUTHORIZED: 'Token is invalid or expired.'})
 class AuthStatus(Resource):
     """Check user's authorization status."""
 
     @auth_ns.doc('check user authentication status', security="Bearer")
+    @auth_ns.marshal_with(
+        user_model,
+        code=HTTPStatus.OK,
+        description='Token is currently valid.')
     def get(self):
         """Validate a session token."""
         return get_logged_in_user()

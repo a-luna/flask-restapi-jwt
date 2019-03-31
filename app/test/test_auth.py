@@ -132,12 +132,10 @@ class TestAuthBlueprint(BaseTestCase):
                 'api/v1/auth/status',
                 headers=dict(Authorization=f'Bearer {jwt_auth}'))
             auth_status_data = auth_status_response.get_json()
-            self.assertEqual(auth_status_data['status'], 'success')
-            self.assertIsNotNone(auth_status_data['data'])
             self.assertEqual(
-                auth_status_data['data']['email'],
+                auth_status_data['email'],
                 'new_user@email.com')
-            self.assertFalse(auth_status_data['data']['admin'])
+            self.assertFalse(auth_status_data['admin'])
             self.assertEqual(auth_status_response.status_code, HTTPStatus.OK)
 
     def test_auth_status_malformed_token_1(self):
