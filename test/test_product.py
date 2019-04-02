@@ -5,9 +5,9 @@ from http import HTTPStatus
 from app import db
 from app.models.product import Product
 from app.models.user import User
-from app.test.base import BaseTestCase
-from app.test.test_auth import register_user, login_user
-from app.util.dt_format_strings import DT_STR_FORMAT_ISO
+from app.util.dt_format_strings import DT_STR_FORMAT_NAIVE
+from test.base import BaseTestCase
+from test.test_auth import register_user, login_user
 
 
 def create_admin_user_and_sign_in(self):
@@ -102,8 +102,8 @@ def create_product_python(self, jwt_auth):
     download_url = 'https://www.python.org/ftp/python/3.7.2/python-3.7.2-macosx10.9.pkg'
     check_time = datetime.utcnow()
     update_time = datetime.utcnow() + timedelta(seconds=3)
-    check_time_str = check_time.replace(tzinfo=timezone.utc).strftime(DT_STR_FORMAT_ISO)
-    update_time_str = update_time.replace(tzinfo=timezone.utc).strftime(DT_STR_FORMAT_ISO)
+    check_time_str = check_time.strftime(DT_STR_FORMAT_NAIVE)
+    update_time_str = update_time.strftime(DT_STR_FORMAT_NAIVE)
     product.newest_version_number = newest_version
     product.download_url = download_url
     product.last_checked = check_time
@@ -115,8 +115,8 @@ def create_product_python(self, jwt_auth):
     self.assertEqual(retrieve_product_data['product_name'], product_name)
     self.assertEqual(retrieve_product_data['newest_version_number'], newest_version)
     self.assertEqual(retrieve_product_data['download_url'], download_url)
-    self.assertEqual(retrieve_product_data['last_checked_utc_iso'], check_time_str)
-    self.assertEqual(retrieve_product_data['last_update_utc_iso'], update_time_str)
+    self.assertEqual(retrieve_product_data['last_checked'], check_time_str)
+    self.assertEqual(retrieve_product_data['last_update'], update_time_str)
     self.assertEqual(retrieve_product_response.content_type, 'application/json')
     self.assertEqual(retrieve_product_response.status_code, HTTPStatus.OK)
 
@@ -256,6 +256,24 @@ class TestProductBlueprint(BaseTestCase):
             self.assertEqual(create_product_data['message'], 'Input payload validation failed')
             self.assertEqual(create_product_response.status_code, HTTPStatus.BAD_REQUEST)
 
+    def test_create_product_admin_token_requred(self):
+        with self.client:
+            jwt_auth = create_regular_user_and_sign_in(self)
+            create_product_response = create_product(
+                self,
+                'python_v3_7',
+                'https://www.python.org/downloads/',
+                '//p[@class="download-buttons"]/a/text()',
+                '//p[@class="download-buttons"]/a/@href',
+                jwt_auth)
+            create_product_data = create_product_response.get_json()
+            self.assertEqual(create_product_data['status'], 'fail')
+            self.assertEqual(
+                create_product_data['message'],
+                'You are not authorized to perform the requested action.')
+            self.assertEqual(create_product_response.content_type, 'application/json')
+            self.assertEqual(create_product_response.status_code, HTTPStatus.UNAUTHORIZED)
+
     def test_retrieve_all_products(self):
         jwt_auth = create_admin_user_and_sign_in(self)
         product_python = create_product_python(self, jwt_auth)
@@ -336,7 +354,6 @@ class TestProductBlueprint(BaseTestCase):
         self.assertEqual(retrive_products_data['items'][5]['product_name'], 'product_5')
         self.assertEqual(retrive_products_data['items'][6]['product_name'], 'product_6')
 
-
     def test_retrieve_product_does_not_exist(self):
         with self.client:
             retrieve_product_response = retrieve_product(self, 'python_v3_7')
@@ -406,24 +423,6 @@ class TestProductBlueprint(BaseTestCase):
                 jwt_auth)
             self.assertEqual(delete_product_response.content_type, 'application/json')
             self.assertEqual(delete_product_response.status_code, HTTPStatus.NO_CONTENT)
-
-    def test_create_product_admin_token_requred(self):
-        with self.client:
-            jwt_auth = create_regular_user_and_sign_in(self)
-            create_product_response = create_product(
-                self,
-                'python_v3_7',
-                'https://www.python.org/downloads/',
-                '//p[@class="download-buttons"]/a/text()',
-                '//p[@class="download-buttons"]/a/@href',
-                jwt_auth)
-            create_product_data = create_product_response.get_json()
-            self.assertEqual(create_product_data['status'], 'fail')
-            self.assertEqual(
-                create_product_data['message'],
-                'You are not authorized to perform the requested action.')
-            self.assertEqual(create_product_response.content_type, 'application/json')
-            self.assertEqual(create_product_response.status_code, HTTPStatus.UNAUTHORIZED)
 
     def test_update_product_admin_token_requred(self):
         with self.client:

@@ -6,7 +6,7 @@ from http import HTTPStatus
 from app import db
 from app.models.blacklist_token import BlacklistToken
 from app.models.user import User
-from app.test.base import BaseTestCase
+from test.base import BaseTestCase
 
 
 def register_user_happy_path(self, email, username, password):
@@ -56,9 +56,10 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertIsNotNone(new_user)
             new_user_repr = (
                 f'User<('
-                    f'public_id={new_user.public_id}, '
+                    f'email={email}, '
                     f'username={username}, '
-                    f'email={email})>')
+                    f'public_id={new_user.public_id}, '
+                    f'admin=False)>')
             self.assertEqual(repr(new_user), new_user_repr)
             try:
                 _ = new_user.password

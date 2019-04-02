@@ -25,7 +25,6 @@ def register_new_user(data):
         error = f'Error: {repr(e)}'
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status='fail')
 
-
 def generate_token(user):
     try:
         auth_token = user.encode_auth_token()
@@ -39,7 +38,6 @@ def generate_token(user):
     except Exception as e:
         error = f'Error: {repr(e)}'
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status='fail')
-
 
 def process_login(data):
     user = User.find_by_email(data['email'])
@@ -55,16 +53,9 @@ def process_login(data):
         error = 'email or password does not match.'
         abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
 
-
 def process_logout():
-    auth_token = request.headers.get('Authorization')
-    if not auth_token:
-        error = 'Invalid token. Please log in again.'
-        abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
-    result = User.decode_auth_token(auth_token)
-    if result.failure:
-        abort(HTTPStatus.UNAUTHORIZED, result.error, status='fail')
-
+    auth_token = get_auth_token()
+    check_auth_token(auth_token)
     blacklist_token = BlacklistToken(auth_token)
     try:
         db.session.add(blacklist_token)
@@ -77,17 +68,26 @@ def process_logout():
         error = f'Error: {repr(e)}'
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status='fail')
 
-
 def get_logged_in_user():
-        auth_token = request.headers.get('Authorization')
-        if not auth_token:
-            error = 'Invalid token. Please log in again.'
-            abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
-        result = User.decode_auth_token(auth_token)
-        if result.failure:
-            abort(HTTPStatus.UNAUTHORIZED, result.error, status='fail')
+    auth_token = get_auth_token()
+    (public_id, _) = check_auth_token(auth_token)
+    user = User.find_by_public_id(public_id)
+    return user, HTTPStatus.OK
 
-        user_public_id = result.value
-        user = User.find_by_public_id(user_public_id)
-        return user, HTTPStatus.OK
+def get_auth_token():
+    auth_token = request.headers.get('Authorization')
+    if not auth_token:
+        error = 'Invalid token. Please log in again.'
+        abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
+    return auth_token
 
+def check_auth_token(auth_token):
+    result = User.decode_auth_token(auth_token)
+    if result.failure:
+        abort(HTTPStatus.UNAUTHORIZED, result.error, status='fail')
+    return result.value
+
+def check_admin_role():
+    auth_token = get_auth_token()
+    (_, auth) = check_auth_token(auth_token)
+    return True if auth else False

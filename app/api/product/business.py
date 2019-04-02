@@ -58,8 +58,8 @@ def update_product(product_name, data):
             xpath_download_url=update_product.xpath_download_url,
             newest_version_number=update_product.newest_version_number,
             download_url=update_product.download_url,
-            last_update=update_product.last_update_utc_iso,
-            last_checked=update_product.last_checked_utc_iso)
+            last_update=update_product.last_update_str,
+            last_checked=update_product.last_checked_str)
         response_data = dict(
             status='success',
             data=product_data)

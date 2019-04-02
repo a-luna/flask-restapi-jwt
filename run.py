@@ -1,28 +1,23 @@
 """Entry point for the flask application."""
+import click
 import coverage
 import os
 import unittest
+from pathlib import Path
 
-import click
-
-COV = coverage.coverage(
-    branch=True,
-    include='app/*',
-    omit=[
-        'app/test/*'
-    ]
-)
+COV = coverage.coverage(branch=True, include='app/*')
 COV.start()
 
 from app import create_app, db
-from app.config import APP_FOLDER, APP_ROOT
 
-TEST_FOLDER = APP_FOLDER / 'test'
 app = create_app(os.getenv('ENV') or 'dev')
 
+from app.config import APP_ROOT
 from app.models.blacklist_token import BlacklistToken
 from app.models.product import Product
 from app.models.user import User
+
+TEST_FOLDER = Path(__file__).resolve().parent / 'test'
 
 
 @app.cli.command()

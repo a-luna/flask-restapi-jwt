@@ -19,8 +19,8 @@ class BlacklistToken(db.Model):
     def __repr__(self):
         return f'BlacklistToken<(id={self.id}, token={self.token})>'
 
-    @staticmethod
-    def check_blacklist(auth_token):
+    @classmethod
+    def check_blacklist(cls, auth_token):
         # check whether auth token has been blacklisted
-        exists = BlacklistToken.query.filter_by(token=str(auth_token)).first()
+        exists = cls.query.filter_by(token=str(auth_token)).first()
         return True if exists else False

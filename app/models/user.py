@@ -4,12 +4,11 @@ import uuid
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
-from flask import current_app
+from flask import current_app, request
 from flask_restplus import abort
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app import db, bcrypt
-from app.config import key
 from app.models.blacklist_token import BlacklistToken
 from app.util.dt_format_strings import DT_STR_FORMAT_NAIVE
 from app.util.result import Result
@@ -41,12 +40,11 @@ class User(db.Model):
         self.admin = admin
 
     def __repr__(self):
-        return (
-            'User<('
-                f'public_id={self.public_id}, '
-                f'username={self.username}, '
-                f'email={self.email}'
-            ')>')
+        return ('User<('
+                    f'email={self.email}, '
+                    f'username={self.username}, '
+                    f'public_id={self.public_id}, '
+                    f'admin={self.admin})>')
 
     @property
     def password(self):
@@ -68,8 +66,15 @@ class User(db.Model):
                 hours=current_app.config.get('AUTH_TOKEN_AGE_HOURS'),
                 minutes=current_app.config.get('AUTH_TOKEN_AGE_MINUTES'),
                 seconds=5)
-        payload = dict(exp=expire_time, iat=now, sub=self.public_id)
-        return jwt.encode(payload, key, algorithm='HS256')
+        payload = dict(
+            exp=expire_time,
+            iat=now,
+            sub=self.public_id,
+            admin=self.admin)
+        return jwt.encode(
+            payload,
+            current_app.config.get('SECRET_KEY'),
+            algorithm='HS256')
 
     @staticmethod
     def decode_auth_token(auth_token):
@@ -81,8 +86,10 @@ class User(db.Model):
             error = 'Token blacklisted. Please log in again.'
             return Result.Fail(error)
         try:
-            payload = jwt.decode(auth_token, key)
-            return Result.Ok(payload['sub'])
+            payload = jwt.decode(
+                auth_token,
+                current_app.config.get('SECRET_KEY'))
+            return Result.Ok((payload['sub'], payload['auth']))
         except jwt.ExpiredSignatureError:
             error =  'Authorization token expired. Please log in again.'
             return Result.Fail(error)

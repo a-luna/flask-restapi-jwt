@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app import db
-from app.util.dt_format_strings import DT_STR_FORMAT_ISO
+from app.util.dt_format_strings import DT_STR_FORMAT_NAIVE
 
 
 class Product(db.Model):
@@ -21,14 +21,14 @@ class Product(db.Model):
     last_checked = db.Column(db.DateTime, nullable=True, default=datetime.min)
 
     @hybrid_property
-    def last_update_utc_iso(self):
-        return self.last_update.replace(tzinfo=timezone.utc)\
-            .strftime(DT_STR_FORMAT_ISO) if self.last_update else None
+    def last_update_str(self):
+        return self.last_update.strftime(DT_STR_FORMAT_NAIVE) \
+            if self.last_update else None
 
     @hybrid_property
-    def last_checked_utc_iso(self):
-        return self.last_checked.replace(tzinfo=timezone.utc)\
-            .strftime(DT_STR_FORMAT_ISO) if self.last_checked else None
+    def last_checked_str(self):
+        return self.last_checked.strftime(DT_STR_FORMAT_NAIVE) \
+            if self.last_checked else None
 
     def __init__(
         self,

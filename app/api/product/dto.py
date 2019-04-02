@@ -87,8 +87,8 @@ product_api_model = product_ns.model(
         'product_name': fields.String,
         'newest_version_number': fields.String,
         'download_url': fields.String,
-        'last_checked_utc_iso': fields.String,
-        'last_update_utc_iso': fields.String})
+        'last_checked': fields.String(attribute='last_checked_str'),
+        'last_update': fields.String(attribute='last_update_str')})
 
 pagination_parser = reqparse.RequestParser(bundle_errors=True)
 pagination_parser.add_argument(

@@ -8,8 +8,6 @@ APP_FOLDER = Path(__file__).resolve().parent
 APP_ROOT = APP_FOLDER.parent
 DOTENV_PATH = APP_ROOT / '.env'
 DB_URL_SQLITE = 'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_prod.db')
-DB_URL_DEV = 'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_dev.db')
-DB_URL_TEST = 'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_test.db')
 
 class Config:
     """Base configuration."""
@@ -33,7 +31,7 @@ class DevelopmentConfig(Config):
     DEBUG = True
     BCRYPT_LOG_ROUNDS = 4
     AUTH_TOKEN_AGE_MINUTES = 15
-    SQLALCHEMY_DATABASE_URI = DB_URL_DEV
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_dev.db')
 
 class TestingConfig(Config):
     """Testing configuration."""
@@ -41,7 +39,7 @@ class TestingConfig(Config):
     DEBUG = True
     TESTING = True
     BCRYPT_LOG_ROUNDS = 4
-    SQLALCHEMY_DATABASE_URI = DB_URL_TEST
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + str(APP_FOLDER / 'flask_restapi_jwt_test.db')
 
 class ProductionConfig(Config):
     """Production configuration."""
@@ -56,5 +54,3 @@ config_by_name = dict(
     test=TestingConfig,
     prod=ProductionConfig
 )
-
-key = Config.SECRET_KEY
