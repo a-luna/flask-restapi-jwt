@@ -1,4 +1,4 @@
-"""Defines data models used by /api/product endpoints."""
+"""Defines data model used by /api/product endpoints."""
 import os
 from datetime import datetime, timezone
 

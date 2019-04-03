@@ -5,7 +5,7 @@ from flask import request
 from flask_restplus import Resource
 
 from app.api.auth import auth_ns
-from app.api.auth.dto import login_reqparser, user_reqparser, user_model
+from app.api.auth.dto import user_reqparser, user_model
 from app.api.auth.business import (
     register_new_user, process_login, process_logout, get_logged_in_user
 )
@@ -40,10 +40,10 @@ class LoginUser(Resource):
             HTTPStatus.BAD_REQUEST: 'Validation error.',
             HTTPStatus.UNAUTHORIZED: 'Email or password does not match.',
             HTTPStatus.INTERNAL_SERVER_ERROR: 'Internal server error.'})
-    @auth_ns.expect(login_reqparser, validate=True)
+    @auth_ns.expect(user_reqparser, validate=True)
     def post(self):
         """Authenticate user and return a session token."""
-        args = login_reqparser.parse_args()
+        args = user_reqparser.parse_args()
         return process_login(data=args)
 
 

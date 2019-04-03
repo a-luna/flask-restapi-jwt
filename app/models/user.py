@@ -23,7 +23,6 @@ class User(db.Model):
     registered_on = db.Column(db.DateTime, nullable=False)
     admin = db.Column(db.Boolean, nullable=False, default=False)
     public_id = db.Column(db.String(100), unique=True)
-    username = db.Column(db.String(50), unique=True)
     password_hash = db.Column(db.String(100))
 
     @hybrid_property
@@ -31,9 +30,8 @@ class User(db.Model):
         return self.registered_on.strftime(DT_STR_FORMAT_NAIVE) \
             if self.registered_on else None
 
-    def __init__(self, email, username, password, admin=False):
+    def __init__(self, email, password, admin=False):
         self.email = email
-        self.username = username
         self.public_id = str(uuid.uuid4())
         self.password = password
         self.registered_on = datetime.utcnow()
@@ -42,7 +40,6 @@ class User(db.Model):
     def __repr__(self):
         return ('User<('
                     f'email={self.email}, '
-                    f'username={self.username}, '
                     f'public_id={self.public_id}, '
                     f'admin={self.admin})>')
 
@@ -88,18 +85,17 @@ class User(db.Model):
         try:
             payload = jwt.decode(
                 auth_token,
-                current_app.config.get('SECRET_KEY'))
-            return Result.Ok((payload['sub'], payload['auth']))
+                current_app.config.get('SECRET_KEY'),
+                algorithms=['HS256'])
+            return Result.Ok(dict(
+                public_id=payload['sub'],
+                admin=payload['admin']))
         except jwt.ExpiredSignatureError:
             error =  'Authorization token expired. Please log in again.'
             return Result.Fail(error)
         except jwt.InvalidTokenError:
             error =  'Invalid token. Please log in again.'
             return Result.Fail(error)
-
-    @classmethod
-    def find_by_username(cls, username):
-        return cls.query.filter_by(username=username).first()
 
     @classmethod
     def find_by_email(cls, email):

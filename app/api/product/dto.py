@@ -85,10 +85,19 @@ put_product_parser.add_argument(
 product_api_model = product_ns.model(
     'Product', {
         'product_name': fields.String,
+        'release_info_url': fields.String,
+        'xpath_version_number': fields.String,
+        'xpath_download_url': fields.String,
         'newest_version_number': fields.String,
         'download_url': fields.String,
-        'last_checked': fields.String(attribute='last_checked_str'),
-        'last_update': fields.String(attribute='last_update_str')})
+        'last_update': fields.String(attribute='last_update_str'),
+        'last_checked': fields.String(attribute='last_checked_str')},
+        mask=('{'
+            'product_name, '
+            'newest_version_number, '
+            'download_url, '
+            'last_update, '
+            'last_checked}'))
 
 pagination_parser = reqparse.RequestParser(bundle_errors=True)
 pagination_parser.add_argument(

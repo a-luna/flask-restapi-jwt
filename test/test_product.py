@@ -1,3 +1,4 @@
+"""Unit tests for /product API endpoints."""
 import json
 from datetime import datetime, timedelta, timezone
 from http import HTTPStatus
@@ -14,7 +15,6 @@ def create_admin_user_and_sign_in(self):
     register_response = register_user(
         self,
         'admin@email.com',
-        'admin',
         'test1234')
     register_data = register_response.get_json()
     self.assertEqual(register_data['status'], 'success')
@@ -40,7 +40,6 @@ def create_regular_user_and_sign_in(self):
     register_response = register_user(
         self,
         'site_user@email.com',
-        'site_user',
         'test5678')
     register_data = register_response.get_json()
     self.assertEqual(register_data['status'], 'success')
@@ -49,7 +48,7 @@ def create_regular_user_and_sign_in(self):
     self.assertEqual(register_response.content_type, 'application/json')
     self.assertEqual(register_response.status_code, HTTPStatus.CREATED)
 
-    user = User.find_by_username('site_user')
+    user = User.find_by_email('site_user@email.com')
     user.admin = False
     db.session.commit()
 
@@ -276,83 +275,83 @@ class TestProductBlueprint(BaseTestCase):
 
     def test_retrieve_all_products(self):
         jwt_auth = create_admin_user_and_sign_in(self)
-        product_python = create_product_python(self, jwt_auth)
-        product_1 = create_product_happy_path(
+        create_product_python(self, jwt_auth)
+        create_product_happy_path(
             self,
             'product_1',
             'https://www.prod1.com',
             '//prod[1]/text()',
             '//prod[1]/@href',
             jwt_auth)
-        product_2 = create_product_happy_path(
+        create_product_happy_path(
             self,
             'product_2',
             'https://www.prod2.com',
             '//prod[2]/text()',
             '//prod[2]/@href',
             jwt_auth)
-        product_3 = create_product_happy_path(
+        create_product_happy_path(
             self,
             'product_3',
             'https://www.prod3.com',
             '//prod[3]/text()',
             '//prod[3]/@href',
             jwt_auth)
-        product_4 = create_product_happy_path(
+        create_product_happy_path(
             self,
             'product_4',
             'https://www.prod4.com',
             '//prod[4]/text()',
             '//prod[4]/@href',
             jwt_auth)
-        product_5 = create_product_happy_path(
+        create_product_happy_path(
             self,
             'product_5',
             'https://www.prod5.com',
             '//prod[5]/text()',
             '//prod[5]/@href',
             jwt_auth)
-        product_6 = create_product_happy_path(
+        create_product_happy_path(
             self,
             'product_6',
             'https://www.prod6.com',
             '//prod[6]/text()',
             '//prod[6]/@href',
             jwt_auth)
-        retrive_products_response = retrieve_all_products(self, 1, 5)
-        retrive_products_data = retrive_products_response.get_json()
-        self.assertEqual(retrive_products_data['page'], 1)
-        self.assertEqual(retrive_products_data['total_pages'], 2)
-        self.assertEqual(retrive_products_data['items_per_page'], 5)
-        self.assertEqual(retrive_products_data['total_items'], 7)
-        self.assertEqual(retrive_products_data['items'][0]['product_name'], 'python_v3_7')
-        self.assertEqual(retrive_products_data['items'][1]['product_name'], 'product_1')
-        self.assertEqual(retrive_products_data['items'][2]['product_name'], 'product_2')
-        self.assertEqual(retrive_products_data['items'][3]['product_name'], 'product_3')
-        self.assertEqual(retrive_products_data['items'][4]['product_name'], 'product_4')
+        retrive_page_1_and_5_per_page_response = retrieve_all_products(self, 1, 5)
+        retrive_page_1_and_5_per_page_data = retrive_page_1_and_5_per_page_response.get_json()
+        self.assertEqual(retrive_page_1_and_5_per_page_data['page'], 1)
+        self.assertEqual(retrive_page_1_and_5_per_page_data['total_pages'], 2)
+        self.assertEqual(retrive_page_1_and_5_per_page_data['items_per_page'], 5)
+        self.assertEqual(retrive_page_1_and_5_per_page_data['total_items'], 7)
+        self.assertEqual(retrive_page_1_and_5_per_page_data['items'][0]['product_name'], 'python_v3_7')
+        self.assertEqual(retrive_page_1_and_5_per_page_data['items'][1]['product_name'], 'product_1')
+        self.assertEqual(retrive_page_1_and_5_per_page_data['items'][2]['product_name'], 'product_2')
+        self.assertEqual(retrive_page_1_and_5_per_page_data['items'][3]['product_name'], 'product_3')
+        self.assertEqual(retrive_page_1_and_5_per_page_data['items'][4]['product_name'], 'product_4')
 
-        retrive_products_response = retrieve_all_products(self, 2, 5)
-        retrive_products_data = retrive_products_response.get_json()
-        self.assertEqual(retrive_products_data['page'], 2)
-        self.assertEqual(retrive_products_data['total_pages'], 2)
-        self.assertEqual(retrive_products_data['items_per_page'], 5)
-        self.assertEqual(retrive_products_data['total_items'], 7)
-        self.assertEqual(retrive_products_data['items'][0]['product_name'], 'product_5')
-        self.assertEqual(retrive_products_data['items'][1]['product_name'], 'product_6')
+        retrive_page_2_and_5_per_page_response = retrieve_all_products(self, 2, 5)
+        retrive_page_2_and_5_per_page_data = retrive_page_2_and_5_per_page_response.get_json()
+        self.assertEqual(retrive_page_2_and_5_per_page_data['page'], 2)
+        self.assertEqual(retrive_page_2_and_5_per_page_data['total_pages'], 2)
+        self.assertEqual(retrive_page_2_and_5_per_page_data['items_per_page'], 5)
+        self.assertEqual(retrive_page_2_and_5_per_page_data['total_items'], 7)
+        self.assertEqual(retrive_page_2_and_5_per_page_data['items'][0]['product_name'], 'product_5')
+        self.assertEqual(retrive_page_2_and_5_per_page_data['items'][1]['product_name'], 'product_6')
 
-        retrive_products_response = retrieve_all_products(self, 1, 10)
-        retrive_products_data = retrive_products_response.get_json()
-        self.assertEqual(retrive_products_data['page'], 1)
-        self.assertEqual(retrive_products_data['total_pages'], 1)
-        self.assertEqual(retrive_products_data['items_per_page'], 10)
-        self.assertEqual(retrive_products_data['total_items'], 7)
-        self.assertEqual(retrive_products_data['items'][0]['product_name'], 'python_v3_7')
-        self.assertEqual(retrive_products_data['items'][1]['product_name'], 'product_1')
-        self.assertEqual(retrive_products_data['items'][2]['product_name'], 'product_2')
-        self.assertEqual(retrive_products_data['items'][3]['product_name'], 'product_3')
-        self.assertEqual(retrive_products_data['items'][4]['product_name'], 'product_4')
-        self.assertEqual(retrive_products_data['items'][5]['product_name'], 'product_5')
-        self.assertEqual(retrive_products_data['items'][6]['product_name'], 'product_6')
+        retrive_page_1_and_10_per_page_response = retrieve_all_products(self, 1, 10)
+        retrive_page_1_and_10_per_page_data = retrive_page_1_and_10_per_page_response.get_json()
+        self.assertEqual(retrive_page_1_and_10_per_page_data['page'], 1)
+        self.assertEqual(retrive_page_1_and_10_per_page_data['total_pages'], 1)
+        self.assertEqual(retrive_page_1_and_10_per_page_data['items_per_page'], 10)
+        self.assertEqual(retrive_page_1_and_10_per_page_data['total_items'], 7)
+        self.assertEqual(retrive_page_1_and_10_per_page_data['items'][0]['product_name'], 'python_v3_7')
+        self.assertEqual(retrive_page_1_and_10_per_page_data['items'][1]['product_name'], 'product_1')
+        self.assertEqual(retrive_page_1_and_10_per_page_data['items'][2]['product_name'], 'product_2')
+        self.assertEqual(retrive_page_1_and_10_per_page_data['items'][3]['product_name'], 'product_3')
+        self.assertEqual(retrive_page_1_and_10_per_page_data['items'][4]['product_name'], 'product_4')
+        self.assertEqual(retrive_page_1_and_10_per_page_data['items'][5]['product_name'], 'product_5')
+        self.assertEqual(retrive_page_1_and_10_per_page_data['items'][6]['product_name'], 'product_6')
 
     def test_retrieve_product_does_not_exist(self):
         with self.client:
@@ -380,10 +379,9 @@ class TestProductBlueprint(BaseTestCase):
                 updated_xpath_2,
                 jwt_auth)
             update_product_data = update_product_response.get_json()
-            self.assertEqual(update_product_data['status'],'success')
-            self.assertEqual(update_product_data['data']['release_info_url'], updated_url)
-            self.assertEqual(update_product_data['data']['xpath_version_number'], updated_xpath_1)
-            self.assertEqual(update_product_data['data']['xpath_download_url'], updated_xpath_2)
+            self.assertEqual(update_product_data['release_info_url'], updated_url)
+            self.assertEqual(update_product_data['xpath_version_number'], updated_xpath_1)
+            self.assertEqual(update_product_data['xpath_download_url'], updated_xpath_2)
             self.assertEqual(update_product_response.content_type, 'application/json')
             self.assertEqual(update_product_response.status_code, HTTPStatus.OK)
 
@@ -402,27 +400,6 @@ class TestProductBlueprint(BaseTestCase):
             self.assertTrue(update_product_data['message'].startswith('Product name: python_v3_7 not found.'))
             self.assertEqual(update_product_response.content_type , 'application/json')
             self.assertEqual(update_product_response.status_code, HTTPStatus.NOT_FOUND)
-
-    def test_delete_product(self):
-        with self.client:
-            jwt_auth = create_admin_user_and_sign_in(self)
-            product = create_product_python(self, jwt_auth)
-            delete_product_response = delete_product(
-                self,
-                product.product_name,
-                jwt_auth)
-            self.assertEqual(delete_product_response.content_type, 'application/json')
-            self.assertEqual(delete_product_response.status_code, HTTPStatus.NO_CONTENT)
-
-    def test_delete_product_does_not_exist(self):
-        with self.client:
-            jwt_auth = create_admin_user_and_sign_in(self)
-            delete_product_response = delete_product(
-                self,
-                'python_v3_7',
-                jwt_auth)
-            self.assertEqual(delete_product_response.content_type, 'application/json')
-            self.assertEqual(delete_product_response.status_code, HTTPStatus.NO_CONTENT)
 
     def test_update_product_admin_token_requred(self):
         with self.client:
@@ -455,6 +432,27 @@ class TestProductBlueprint(BaseTestCase):
                 'You are not authorized to perform the requested action.')
             self.assertEqual(update_product_response.content_type, 'application/json')
             self.assertEqual(update_product_response.status_code, HTTPStatus.UNAUTHORIZED)
+
+    def test_delete_product(self):
+        with self.client:
+            jwt_auth = create_admin_user_and_sign_in(self)
+            product = create_product_python(self, jwt_auth)
+            delete_product_response = delete_product(
+                self,
+                product.product_name,
+                jwt_auth)
+            self.assertEqual(delete_product_response.content_type, 'application/json')
+            self.assertEqual(delete_product_response.status_code, HTTPStatus.NO_CONTENT)
+
+    def test_delete_product_does_not_exist(self):
+        with self.client:
+            jwt_auth = create_admin_user_and_sign_in(self)
+            delete_product_response = delete_product(
+                self,
+                'python_v3_7',
+                jwt_auth)
+            self.assertEqual(delete_product_response.content_type, 'application/json')
+            self.assertEqual(delete_product_response.status_code, HTTPStatus.NO_CONTENT)
 
         def test_delete_product_admin_token_requred(self):
             with self.client:

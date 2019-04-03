@@ -1,3 +1,4 @@
+"""Business logic for /product API endpoints."""
 from datetime import datetime
 from http import HTTPStatus
 
@@ -51,19 +52,7 @@ def update_product(product_name, data):
             setattr(update_product, k, v)
         setattr(update_product, 'last_update', datetime.utcnow())
         db.session.commit()
-        product_data = dict(
-            product_name=update_product.product_name,
-            release_info_url=update_product.release_info_url,
-            xpath_version_number=update_product.xpath_version_number,
-            xpath_download_url=update_product.xpath_download_url,
-            newest_version_number=update_product.newest_version_number,
-            download_url=update_product.download_url,
-            last_update=update_product.last_update_str,
-            last_checked=update_product.last_checked_str)
-        response_data = dict(
-            status='success',
-            data=product_data)
-        return response_data, HTTPStatus.OK
+        return update_product, HTTPStatus.OK
     except Exception as e:
         error = f'Error: {repr(e)}'
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status='fail')

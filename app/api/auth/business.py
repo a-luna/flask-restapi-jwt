@@ -1,3 +1,4 @@
+"""Business logic for /auth API endpoints."""
 from datetime import datetime
 from http import HTTPStatus
 
@@ -16,7 +17,6 @@ def register_new_user(data):
     try:
         new_user = User(
             email=data['email'],
-            username=data['username'],
             password=data['password'])
         db.session.add(new_user)
         db.session.commit()
@@ -54,8 +54,8 @@ def process_login(data):
         abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
 
 def process_logout():
-    auth_token = get_auth_token()
-    check_auth_token(auth_token)
+    check_auth_token()
+    auth_token = request.headers.get('Authorization')
     blacklist_token = BlacklistToken(auth_token)
     try:
         db.session.add(blacklist_token)
@@ -69,25 +69,16 @@ def process_logout():
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status='fail')
 
 def get_logged_in_user():
-    auth_token = get_auth_token()
-    (public_id, _) = check_auth_token(auth_token)
-    user = User.find_by_public_id(public_id)
+    user_dict = check_auth_token()
+    user = User.find_by_public_id(user_dict['public_id'])
     return user, HTTPStatus.OK
 
-def get_auth_token():
+def check_auth_token():
     auth_token = request.headers.get('Authorization')
     if not auth_token:
         error = 'Invalid token. Please log in again.'
         abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
-    return auth_token
-
-def check_auth_token(auth_token):
     result = User.decode_auth_token(auth_token)
     if result.failure:
         abort(HTTPStatus.UNAUTHORIZED, result.error, status='fail')
     return result.value
-
-def check_admin_role():
-    auth_token = get_auth_token()
-    (_, auth) = check_auth_token(auth_token)
-    return True if auth else False

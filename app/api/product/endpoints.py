@@ -78,6 +78,11 @@ class Product(Resource):
             HTTPStatus.NOT_FOUND: 'Product not found',
             HTTPStatus.INTERNAL_SERVER_ERROR: 'Internal server error.'})
     @product_ns.expect(put_product_parser, validate=True)
+    @product_ns.marshal_with(
+        product_api_model,
+        mask='*',
+        code=HTTPStatus.OK,
+        description='Successfully retrieved product.')
     @admin_token_required
     def put(self, name):
         """Update an existing product."""

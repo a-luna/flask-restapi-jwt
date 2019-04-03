@@ -1,16 +1,18 @@
+"""Decorator that checks authorization token for administrator privileges."""
 from functools import wraps
 from http import HTTPStatus
 
 from flask import request
 from flask_restplus import abort
 
-from app.api.auth.business import check_admin_role
+from app.api.auth.business import check_auth_token
 
 
 def admin_token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not check_admin_role():
+        user_dict = check_auth_token()
+        if not user_dict['admin']:
             error = 'You are not authorized to perform the requested action.'
             abort(HTTPStatus.UNAUTHORIZED, error, status='fail')
         return f(*args, **kwargs)

@@ -26,7 +26,7 @@ def run():
 
 @app.cli.command()
 def test():
-    """Runs the unit tests without test coverage."""
+    """Run unit tests without test coverage."""
     tests = unittest.TestLoader().discover(TEST_FOLDER, pattern='test*.py')
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
@@ -35,7 +35,7 @@ def test():
 
 @app.cli.command()
 def cov():
-    """Runs the unit tests with coverage."""
+    """Run unit tests and calculate code coverage."""
     tests = unittest.TestLoader().discover(TEST_FOLDER)
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():

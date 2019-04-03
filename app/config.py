@@ -1,3 +1,4 @@
+"""Configuration classes for dev, test and production environments."""
 import os
 from pathlib import Path
 
