@@ -1,15 +1,14 @@
 """Defines data model used by /api/product endpoints."""
-import os
-from datetime import datetime, timezone
+from datetime import datetime
 
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from app import db
-from app.util.dt_format_strings import DT_STR_FORMAT_NAIVE
+from app.util.constants import DT_STR_FORMAT_NAIVE
 
 
 class Product(db.Model):
-    __tablename__ = 'release_info'
+    __tablename__ = "release_info"
     id = db.Column(db.Integer, primary_key=True)
     product_name = db.Column(db.String(), unique=True)
     release_info_url = db.Column(db.String(), unique=False)
@@ -22,13 +21,17 @@ class Product(db.Model):
 
     @hybrid_property
     def last_update_str(self):
-        return self.last_update.strftime(DT_STR_FORMAT_NAIVE) \
-            if self.last_update else None
+        return (
+            self.last_update.strftime(DT_STR_FORMAT_NAIVE) if self.last_update else None
+        )
 
     @hybrid_property
     def last_checked_str(self):
-        return self.last_checked.strftime(DT_STR_FORMAT_NAIVE) \
-            if self.last_checked else None
+        return (
+            self.last_checked.strftime(DT_STR_FORMAT_NAIVE)
+            if self.last_checked
+            else None
+        )
 
     def __init__(
         self,
@@ -39,7 +42,7 @@ class Product(db.Model):
         newest_version_number=None,
         download_url=None,
         last_update=None,
-        last_checked=None
+        last_checked=None,
     ):
         if last_update is None:
             last_update = datetime.min
@@ -57,15 +60,11 @@ class Product(db.Model):
 
     def __repr__(self):
         return (
-            'Product<('
-                'id={id}, '
-                'product_name={name}, '
-                'newest_version_number={version})>'
-        ).format(
-            id=self.id,
-            name=self.product_name,
-            version=self.newest_version_number
-        )
+            "Product<("
+            "id={id}, "
+            "product_name={name}, "
+            "newest_version_number={version})>"
+        ).format(id=self.id, name=self.product_name, version=self.newest_version_number)
 
     @classmethod
     def find_by_name(cls, product_name):

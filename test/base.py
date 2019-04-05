@@ -8,7 +8,7 @@ class BaseTestCase(TestCase):
     """Base test case, create app and perform db setup/teardown."""
 
     def create_app(self):
-        app = create_app('test')
+        app = create_app("test")
         return app
 
     def setUp(self):

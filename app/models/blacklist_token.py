@@ -6,7 +6,8 @@ from app import db
 
 class BlacklistToken(db.Model):
     """Token Model for storing JWT tokens."""
-    __tablename__ = 'blacklist_tokens'
+
+    __tablename__ = "blacklist_tokens"
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     token = db.Column(db.String(500), unique=True, nullable=False)
@@ -17,7 +18,7 @@ class BlacklistToken(db.Model):
         self.blacklisted_on = datetime.now(timezone.utc)
 
     def __repr__(self):
-        return f'BlacklistToken<(id={self.id}, token={self.token})>'
+        return f"BlacklistToken<(id={self.id}, token={self.token})>"
 
     @classmethod
     def check_blacklist(cls, auth_token):

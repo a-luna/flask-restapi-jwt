@@ -1,4 +1,4 @@
-class Result():
+class Result:
     """Represents the outcome of an operation.
 
     Attributes
@@ -55,13 +55,13 @@ class Result():
 
     def __str__(self):
         if self.success:
-            return '[Success]'
+            return "[Success]"
         else:
-            return f'[Failure] {self.error}'
+            return f"[Failure] {self.error}"
 
     def __repr__(self):
         if self.success:
-            return f'Result<(success={self.success}>'
+            return f"Result<(success={self.success}>"
         else:
             return f'Result<(success={self.success}, message="{self.error}")>'
 
