@@ -1,22 +1,23 @@
 """Entry point for the flask application."""
-import coverage
 import os
 import unittest
+from coverage import coverage
 from pathlib import Path
 
-COV = coverage.coverage(branch=True, include="app/*")
+COV = coverage(branch=True, include="app/*")
 COV.start()
 
 from app import create_app, db
 
 app = create_app(os.getenv("ENV") or "dev")
 
-from app.config import APP_ROOT
 from app.models.blacklist_token import BlacklistToken
 from app.models.product import Product
 from app.models.user import User
 
-TEST_FOLDER = Path(__file__).resolve().parent / "test"
+APP_ROOT = Path(__file__).resolve().parent
+TEST_FOLDER = APP_ROOT / "test"
+COV_FOLDER = APP_ROOT / "tmp" / "coverage"
 
 
 @app.cli.command()
@@ -44,9 +45,8 @@ def cov():
         COV.save()
         print("Coverage Summary:")
         COV.report()
-        covdir = APP_ROOT / "tmp" / "coverage"
-        COV.html_report(directory=str(covdir))
-        print("\nHTML version: file://%s/index.html" % covdir)
+        COV.html_report(directory=str(COV_FOLDER))
+        print(f"\nHTML version: file://{COV_FOLDER}/index.html")
         COV.erase()
         return 0
     return 1
