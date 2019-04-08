@@ -1,16 +1,15 @@
+"""Create RSA key-pair for signing auth_tokens in JWT format."""
 import os
 
 from Cryptodome.PublicKey import RSA
 
 
 def get_private_key():
-    key = construct_rsa_key()
-    return key.export_key()
+    return construct_rsa_key().export_key()
 
 
 def get_public_key():
-    key = construct_rsa_key()
-    return key.publickey().export_key()
+    return construct_rsa_key().publickey().export_key()
 
 
 def construct_rsa_key():
