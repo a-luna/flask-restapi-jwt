@@ -31,6 +31,7 @@ class Config:
 class TestingConfig(Config):
     """Testing configuration."""
 
+    ENV = "test"
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + str(
         APP_FOLDER / "flask_restapi_jwt_test.db"
     )
@@ -39,6 +40,7 @@ class TestingConfig(Config):
 class DevelopmentConfig(Config):
     """Development configuration."""
 
+    ENV = "development"
     TESTING = False
     AUTH_TOKEN_AGE_MINUTES = 15
     SQLALCHEMY_DATABASE_URI = "sqlite:///" + str(

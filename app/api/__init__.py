@@ -32,6 +32,9 @@ API_DESCRIPTION = (
     '<strong><span style="color:#49cc90">POST /auth/logout</span></strong> '
     "<i>method. You can always generate a new token by logging in with valid "
     "user credentials.</i></p></li></ol>"
+    "<p>The auth token contains a signature which was generated with RSA "
+    "public-key cryptography. You can verify the integrity of any auth token with "
+    f'this <a href="../../static/public.pem" target="_blank">public key</a></p>'
     "<p>Please note that some API methods require a valid authorization "
     "token AND administrator privileges. These methods are: "
     '<strong><span style="color:#49cc90">POST product/{name}</span></strong>, '
@@ -64,4 +67,3 @@ from app.api.product import product_ns
 
 api.add_namespace(auth_ns, path="/auth")
 api.add_namespace(product_ns, path="/product")
-
