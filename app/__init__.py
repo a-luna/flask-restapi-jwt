@@ -7,7 +7,7 @@ from flask_cors import CORS
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from app.config import config_by_name
+from app.config import CONFIG_DICT
 
 
 APP_FOLDER = Path(__file__).resolve().parent
@@ -20,7 +20,7 @@ migrate = Migrate()
 
 def create_app(config_name):
     app = Flask(__name__, root_path=APP_FOLDER)
-    app.config.from_object(config_by_name[config_name])
+    app.config.from_object(CONFIG_DICT[config_name])
 
     from app.api import api_bp
 

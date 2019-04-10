@@ -9,8 +9,8 @@ from app.models.user import User
 from test.base import BaseTestCase
 
 
-def register_user_happy_path(self, email, password):
-    register_response = register_user(self, email, password)
+def register_user_happy_path(self):
+    register_response = register_user(self, "new_user@email.com", "test1234")
     register_data = register_response.get_json()
     self.assertEqual(register_data["status"], "success")
     self.assertEqual(register_data["message"], "Successfully registered.")
@@ -52,14 +52,12 @@ def login_user(self, email, password):
 class TestAuthBlueprint(BaseTestCase):
     def test_registration(self):
         with self.client:
-            email = "new_user@email.com"
-            password = "test1234"
-            register_user_happy_path(self, email, password)
-            new_user = User.find_by_email(email)
+            register_user_happy_path(self)
+            new_user = User.find_by_email("new_user@email.com")
             self.assertIsNotNone(new_user)
             new_user_repr = (
                 f"User<("
-                f"email={email}, "
+                f"email={new_user.email}, "
                 f"public_id={new_user.public_id}, "
                 f"admin=False)>"
             )
@@ -84,9 +82,7 @@ class TestAuthBlueprint(BaseTestCase):
 
     def test_login(self):
         with self.client:
-            email = "new_user@email.com"
-            password = "test1234"
-            register_user_happy_path(self, email, password)
+            register_user_happy_path(self)
             login_user_heppy_path(self)
 
     def test_login_email_does_not_exist(self):
@@ -100,9 +96,7 @@ class TestAuthBlueprint(BaseTestCase):
 
     def test_auth_status(self):
         with self.client:
-            email = "new_user@email.com"
-            password = "test1234"
-            jwt_auth = register_user_happy_path(self, email, password)
+            jwt_auth = register_user_happy_path(self)
             auth_status_response = self.client.get(
                 "api/v1/auth/status", headers=dict(Authorization=f"Bearer {jwt_auth}")
             )
@@ -144,9 +138,7 @@ class TestAuthBlueprint(BaseTestCase):
 
     def test_auth_status_token_blacklisted(self):
         with self.client:
-            email = "new_user@email.com"
-            password = "test1234"
-            jwt_auth = register_user_happy_path(self, email, password)
+            jwt_auth = register_user_happy_path(self)
             blacklist_token = BlacklistToken(token=jwt_auth)
             db.session.add(blacklist_token)
             db.session.commit()
@@ -172,9 +164,7 @@ class TestAuthBlueprint(BaseTestCase):
 
     def test_logout(self):
         with self.client:
-            email = "new_user@email.com"
-            password = "test1234"
-            register_user_happy_path(self, email, password)
+            register_user_happy_path(self)
             jwt_auth = login_user_heppy_path(self)
             logout_response = self.client.post(
                 "api/v1/auth/logout", headers=dict(Authorization=f"Bearer {jwt_auth}")
@@ -186,9 +176,7 @@ class TestAuthBlueprint(BaseTestCase):
 
     def test_logout_auth_token_expired(self):
         with self.client:
-            email = "new_user@email.com"
-            password = "test1234"
-            register_user_happy_path(self, email, password)
+            register_user_happy_path(self)
             jwt_auth = login_user_heppy_path(self)
             time.sleep(6)
             logout_response = self.client.post(
@@ -204,9 +192,7 @@ class TestAuthBlueprint(BaseTestCase):
 
     def test_logout_token_blacklisted(self):
         with self.client:
-            email = "new_user@email.com"
-            password = "test1234"
-            register_user_happy_path(self, email, password)
+            register_user_happy_path(self)
             jwt_auth = login_user_heppy_path(self)
             blacklist_token = BlacklistToken(token=jwt_auth)
             token_repr = (

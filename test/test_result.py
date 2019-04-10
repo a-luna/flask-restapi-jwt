@@ -32,3 +32,6 @@ class TestResult(TestCase):
             f'Result<(success=False, message="Something went wrong...")>',
         )
 
+
+if __name__ == "__main__":
+    unittest.main()

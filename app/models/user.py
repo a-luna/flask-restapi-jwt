@@ -69,9 +69,17 @@ class User(db.Model):
             minutes=current_app.config.get("AUTH_TOKEN_AGE_MINUTES"),
             seconds=5,
         )
-        key = get_private_key()
+
+        result = get_private_key()
+        if result.success:
+            key = result.value
+            algorithm = "RS256"
+        else:
+            key = current_app.config.get("SECRET_KEY")
+            algorithm = "HS256"
+
         payload = dict(exp=expire_time, iat=now, sub=self.public_id, admin=self.admin)
-        return jwt.encode(payload, key, algorithm="RS256")
+        return jwt.encode(payload, key, algorithm=algorithm)
 
     @staticmethod
     def decode_auth_token(auth_token):
@@ -82,9 +90,17 @@ class User(db.Model):
         if BlacklistToken.check_blacklist(auth_token):
             error = "Token blacklisted. Please log in again."
             return Result.Fail(error)
-        key = get_public_key()
+
+        result = get_public_key()
+        if result.success:
+            key = result.value
+            algorithm = "RS256"
+        else:
+            key = current_app.config.get("SECRET_KEY")
+            algorithm = "HS256"
+
         try:
-            payload = jwt.decode(auth_token, key, algorithms=["RS256"])
+            payload = jwt.decode(auth_token, key, algorithms=[algorithm])
             return Result.Ok(dict(public_id=payload["sub"], admin=payload["admin"]))
         except jwt.ExpiredSignatureError:
             error = "Authorization token expired. Please log in again."
