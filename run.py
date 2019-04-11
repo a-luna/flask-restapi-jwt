@@ -5,8 +5,8 @@ from coverage import coverage
 from Cryptodome.PublicKey import RSA
 from pathlib import Path
 
-COV = coverage(branch=True, include="app/*")
-COV.start()
+cov = coverage(branch=True, include="app/*")
+cov.start()
 
 from app import create_app, db
 
@@ -38,18 +38,18 @@ def test():
 
 
 @app.cli.command()
-def cov():
+def test_cov():
     """Run unit tests and calculate code coverage."""
     tests = unittest.TestLoader().discover(TEST_FOLDER)
     result = unittest.TextTestRunner(verbosity=2).run(tests)
     if result.wasSuccessful():
-        COV.stop()
-        COV.save()
+        cov.stop()
+        cov.save()
         print("Coverage Summary:")
-        COV.report()
-        COV.html_report(directory=str(COV_FOLDER))
+        cov.report()
+        cov.html_report(directory=str(COV_FOLDER))
         print(f"\nHTML version: file://{COV_FOLDER}/index.html")
-        COV.erase()
+        cov.erase()
         return 0
     return 1
 

@@ -15,7 +15,7 @@ test:
 
 test-cov:
 	@echo 'RUNNING UNIT TESTS AND GENERATING CODE COVERAGE...'
-	@flask cov
+	@flask test-cov
 
 run:
 	@echo 'STARTING FLASK WEB APPLICATION...'

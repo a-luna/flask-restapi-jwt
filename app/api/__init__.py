@@ -1,6 +1,19 @@
 """API and API namespace configuration."""
+from pathlib import Path
+
+from Cryptodome.PublicKey import RSA
+
 from flask import Blueprint
 from flask_restplus import Api
+
+APP_FOLDER = Path(__file__).resolve().parent.parent
+PUBLIC_KEY_FILE = APP_FOLDER / "static" / "public.pem"
+public_key = (
+    RSA.import_key(PUBLIC_KEY_FILE.read_bytes())
+    .publickey()
+    .export_key()
+    .decode("utf-8")
+)
 
 API_DESCRIPTION = (
     "<p>API methods marked with a lock icon require that a valid authorization "
@@ -34,7 +47,8 @@ API_DESCRIPTION = (
     "user credentials.</i></p></li></ol>"
     "<p>The auth token contains a signature which was generated with RSA "
     "public-key cryptography. You can verify the integrity of any auth token with "
-    f'this <a href="../../static/public.pem" target="_blank">public key</a></p>'
+    "this public key:</p>"
+    f'<div><pre style="width:min-content;margin:0 auto;"><code>{public_key}</code></pre></div>'
     "<p>Please note that some API methods require a valid authorization "
     "token AND administrator privileges. These methods are: "
     '<strong><span style="color:#49cc90">POST product/{name}</span></strong>, '
