@@ -8,12 +8,16 @@ from flask_restplus import Api
 
 APP_FOLDER = Path(__file__).resolve().parent.parent
 PUBLIC_KEY_FILE = APP_FOLDER / "static" / "public.pem"
-public_key = (
-    RSA.import_key(PUBLIC_KEY_FILE.read_bytes())
-    .publickey()
-    .export_key()
-    .decode("utf-8")
-)
+
+if PUBLIC_KEY_FILE.exists():
+    public_key = (
+        RSA.import_key(PUBLIC_KEY_FILE.read_bytes())
+        .publickey()
+        .export_key()
+        .decode("utf-8")
+    )
+else:
+    public_key = "Error occurred locating public key file, auth tokens will be \nsigned using HS256 algorithm rather than with RS256 public-key \ncrypto algorithm."
 public_key_css = "width:min-content;background:rgba(0,0,0,.05);border:1px solid rgba(59,65,81,.3);border-radius:4px;margin:0 auto;padding:5px 10px"
 
 API_DESCRIPTION = (

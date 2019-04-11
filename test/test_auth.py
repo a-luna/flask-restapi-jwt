@@ -162,6 +162,20 @@ class TestAuthBlueprint(BaseTestCase):
             )
             self.assertEqual(auth_status_response.status_code, HTTPStatus.UNAUTHORIZED)
 
+    def test_auth_algorithm_hs256(self):
+        with self.client:
+            # verify auth token still created when rsa parameter missing
+            self.app.config["JWT_KEY_N"] = None
+            jwt_auth = register_user_happy_path(self)
+            self.assertIsNotNone(jwt_auth)
+            auth_status_response = self.client.get(
+                "api/v1/auth/status", headers=dict(Authorization=f"Bearer {jwt_auth}")
+            )
+            auth_status_data = auth_status_response.get_json()
+            self.assertEqual(auth_status_data["email"], "new_user@email.com")
+            self.assertFalse(auth_status_data["admin"])
+            self.assertEqual(auth_status_response.status_code, HTTPStatus.OK)
+
     def test_logout(self):
         with self.client:
             register_user_happy_path(self)
