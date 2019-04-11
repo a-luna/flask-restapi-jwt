@@ -48,7 +48,8 @@ API_DESCRIPTION = (
     "<p>The auth token contains a signature which was generated with RSA "
     "public-key cryptography. You can verify the integrity of any auth token with "
     "this public key:</p>"
-    f'<div><pre style="width:min-content;margin:0 auto;"><code>{public_key}</code></pre></div>'
+    '<pre style="width:min-content;margin:0 auto;background:rgba(0,0,0,.05)">'
+    f'<code style="background:None">{public_key}</code></pre>'
     "<p>Please note that some API methods require a valid authorization "
     "token AND administrator privileges. These methods are: "
     '<strong><span style="color:#49cc90">POST product/{name}</span></strong>, '
