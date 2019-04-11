@@ -14,6 +14,7 @@ public_key = (
     .export_key()
     .decode("utf-8")
 )
+public_key_css = "width:min-content;background:rgba(0,0,0,.05);border:1px solid rgba(59,65,81,.3);border-radius:4px;margin:0 auto;padding:5px 10px"
 
 API_DESCRIPTION = (
     "<p>API methods marked with a lock icon require that a valid authorization "
@@ -48,8 +49,7 @@ API_DESCRIPTION = (
     "<p>The auth token contains a signature which was generated with RSA "
     "public-key cryptography. You can verify the integrity of any auth token with "
     "this public key:</p>"
-    '<pre style="width:min-content;margin:0 auto;background:rgba(0,0,0,.05)">'
-    f'<code style="background:None">{public_key}</code></pre>'
+    f'<pre style="{public_key_css}"><code style="background:None">{public_key}</code></pre>'
     "<p>Please note that some API methods require a valid authorization "
     "token AND administrator privileges. These methods are: "
     '<strong><span style="color:#49cc90">POST product/{name}</span></strong>, '
