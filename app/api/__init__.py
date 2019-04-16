@@ -13,7 +13,7 @@ if PUBLIC_KEY_FILE.exists():
     public_key = PUBLIC_KEY_FILE.read_bytes().decode("ascii")
 else:
     public_key = "Error occurred locating public key file, auth tokens will be \nsigned using HS256 algorithm rather than with RS256 public-key \ncrypto algorithm."
-public_key_css = "width:min-content;background:rgba(0,0,0,.05);border:1px solid rgba(59,65,81,.3);border-radius:4px;margin:0 auto;padding:5px 10px"
+public_key_css = "width:min-content;background:rgba(0,0,0,.05);border:1px solid rgba(59,65,81,.3);border-radius:4px;margin:0 auto;padding:5px 10px;white-space:normal"
 h2_style = "color:#9012fe;font-size:1em;margin:1em 0 0"
 
 API_DESCRIPTION = (
