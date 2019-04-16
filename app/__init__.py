@@ -2,6 +2,7 @@
 from pathlib import Path
 
 from flask import Flask
+from flask_bootstrap import Bootstrap
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
 from flask_migrate import Migrate
@@ -12,6 +13,7 @@ from app.config import CONFIG_DICT
 
 APP_FOLDER = Path(__file__).resolve().parent
 
+bootstrap = Bootstrap()
 cors = CORS()
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -30,6 +32,7 @@ def create_app(config_name):
 
     app.register_blueprint(routes_bp)
 
+    bootstrap.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     bcrypt.init_app(app)

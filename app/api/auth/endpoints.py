@@ -1,10 +1,11 @@
 """API endpoint definitions for /auth namespace."""
 from http import HTTPStatus
 
+from flask import request
 from flask_restplus import Resource
 
 from app.api.auth import auth_ns
-from app.api.auth.dto import user_reqparser, user_model
+from app.api.auth.dto import auth_reqparser, secure_reqparser, user_model
 from app.api.auth.business import (
     register_new_user,
     process_login,
@@ -17,19 +18,11 @@ from app.api.auth.business import (
 class RegisterUser(Resource):
     """Register a new user."""
 
-    @auth_ns.doc(
-        "register a new user",
-        responses={
-            HTTPStatus.CREATED: "New user was successfully created.",
-            HTTPStatus.BAD_REQUEST: "Validation error.",
-            HTTPStatus.CONFLICT: "Email address is already registered.",
-            HTTPStatus.INTERNAL_SERVER_ERROR: "Internal server error.",
-        },
-    )
-    @auth_ns.expect(user_reqparser, validate=True)
+    @auth_ns.doc(False)
+    @auth_ns.expect(secure_reqparser, validate=True)
     def post(self):
         """Register a new user."""
-        args = user_reqparser.parse_args()
+        args = secure_reqparser.parse_args()
         return register_new_user(data=args)
 
 
@@ -37,19 +30,11 @@ class RegisterUser(Resource):
 class LoginUser(Resource):
     """User Login Resource."""
 
-    @auth_ns.doc(
-        "user login",
-        responses={
-            HTTPStatus.OK: "Login succeeded.",
-            HTTPStatus.BAD_REQUEST: "Validation error.",
-            HTTPStatus.UNAUTHORIZED: "Email or password does not match.",
-            HTTPStatus.INTERNAL_SERVER_ERROR: "Internal server error.",
-        },
-    )
-    @auth_ns.expect(user_reqparser, validate=True)
+    @auth_ns.doc(False)
+    @auth_ns.expect(secure_reqparser, validate=True)
     def post(self):
         """Authenticate user and return a session token."""
-        args = user_reqparser.parse_args()
+        args = secure_reqparser.parse_args()
         return process_login(data=args)
 
 

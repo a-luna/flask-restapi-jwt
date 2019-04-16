@@ -1,0 +1,62 @@
+{% extends "base.html" %} {% block grid_rows %}
+<div id="secure-auth" class="row" data-public-key="{{ public_key }}">
+    <div id="login" class="column column-1 card">
+        <form role="form">
+            <p>Existing User? Login</p>
+            <div class="form-group">
+                <label for="login-email">Email
+                    <input id="login-email" name="login-email" class="form-control" type="text" ng-model="loginEmail"
+                        required />
+                </label>
+                <label for="login-password">Password
+                    <input id="login-password" name="login-password" class="form-control" type="password"
+                        ng-model="loginPassword" required />
+                </label>
+                <div class="buttons">
+                    <button id="login-button" class="btn btn-default" ng-click="userLogin()">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div id="registration" class="column column-1 card">
+        <form role="form">
+            <p>New User? Register</p>
+            <div class="form-group">
+                <label for="register-email">Email
+                    <input id="register-email" name="register-email" class="form-control" type="text"
+                        ng-model="registerEmail" required />
+                </label>
+                <label for="create-password">Create Password
+                    <input id="create-password" name="create-password" class="form-control" type="password"
+                        ng-model="createPassword" required />
+                </label>
+                <label for="confirm-password">Confirm Password
+                    <input id="confirm-password" name="confirm-password" class="form-control" type="password"
+                        ng-model="confirmPassword" required />
+                </label>
+                <div class="buttons">
+                    <button id="register-button" class="btn btn-default" ng-click="registerNewUser()">
+                        Submit
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div id="auth-success" class="hide-element">
+    {% raw %}
+    <p id="auth-success-type">{{ authSuccessType }}</p>
+    <p id="auth-success-message">Use the token below with any <a href="/api/v1/ui">API method</a> that requires authorization:
+    </p>
+    <pre id="auth-token"><code>{{ authToken }}</code></pre> {% endraw %}
+</div>
+<div id="auth-error" class="hide-element">
+    {% raw %}
+    <p id="auth-error-type">{{ authErrorType }}</p>
+    {% endraw %}
+</div>
+{% endblock %} {% block scripts %} {{ super() }}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

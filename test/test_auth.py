@@ -238,6 +238,21 @@ class TestAuthBlueprint(BaseTestCase):
             )
             self.assertEqual(logout_response.status_code, HTTPStatus.UNAUTHORIZED)
 
+    def test_auth(self):
+        import json
+        from base64 import standard_b64decode, standard_b64encode
+        from app.util.crypto import encrypt_user_credentials, decrypt_user_credentials
+
+        email = "aaronluna@gmail.com"
+        password = "123456"
+        result = encrypt_user_credentials(email, password)
+
+        b64 = json.loads(result.value)
+        result = decrypt_user_credentials(b64["key"], b64["iv"], b64["ct"])
+        creds_dict = result.value
+
+        satan = 666
+
 
 if __name__ == "__main__":
     unittest.main()

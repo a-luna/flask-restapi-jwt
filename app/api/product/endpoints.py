@@ -45,7 +45,8 @@ class ProductList(Resource):
         security="Bearer",
         responses={
             HTTPStatus.CREATED: "Product was added.",
-            HTTPStatus.UNAUTHORIZED: "Admin token required.",
+            HTTPStatus.UNAUTHORIZED: "Please login with a valid authorization token.",
+            HTTPStatus.FORBIDDEN: "You are not authorized to perform the requested action.",
             HTTPStatus.CONFLICT: "Product name already exists, must be unique.",
             HTTPStatus.INTERNAL_SERVER_ERROR: "Internal server error.",
         },
@@ -81,7 +82,8 @@ class Product(Resource):
         security="Bearer",
         responses={
             HTTPStatus.OK: "Product was updated.",
-            HTTPStatus.UNAUTHORIZED: "Admin token required, please login.",
+            HTTPStatus.UNAUTHORIZED: "Please login with a valid authorization token.",
+            HTTPStatus.FORBIDDEN: "You are not authorized to perform the requested action.",
             HTTPStatus.NOT_FOUND: "Product not found",
             HTTPStatus.INTERNAL_SERVER_ERROR: "Internal server error.",
         },
@@ -104,7 +106,8 @@ class Product(Resource):
         security="Bearer",
         responses={
             HTTPStatus.NO_CONTENT: "Product was deleted.",
-            HTTPStatus.UNAUTHORIZED: "Admin token required, please login.",
+            HTTPStatus.UNAUTHORIZED: "Please login with a valid authorization token.",
+            HTTPStatus.FORBIDDEN: "You are not authorized to perform the requested action.",
         },
     )
     @admin_token_required

@@ -4,31 +4,55 @@ from flask_restplus.reqparse import Argument
 from flask_restplus.inputs import email
 
 from app.api.auth import auth_ns
+from app.util.crypto import B64_STANDARD
 
 
-email_arg = Argument(
+def base64_standard(input):
+    """Return input if input is b64 encoded string, raise an exception if validation fails."""
+    b64_encoded = all(char in B64_STANDARD for char in input)
+    total_chunks, extra_digits = divmod(len(input), 4)
+    if b64_encoded and total_chunks and not extra_digits:
+        return input
+    else:
+        raise ValueError("Value must be a base64 encoded string")
+
+
+secure_reqparser = reqparse.RequestParser(bundle_errors=True)
+secure_reqparser.add_argument(
+    name="key",
+    type=base64_standard,
+    required=True,
+    nullable=False,
+    help="Encrypted session key.",
+)
+secure_reqparser.add_argument(
+    name="iv",
+    type=base64_standard,
+    required=True,
+    nullable=False,
+    help="Initialization vector.",
+)
+secure_reqparser.add_argument(
+    name="ct", type=base64_standard, required=True, nullable=False, help="Ciphertext"
+)
+
+auth_reqparser = reqparse.RequestParser(bundle_errors=True)
+auth_reqparser.add_argument(
     name="email",
-    dest="email",
     type=email(),
     location="form",
     required=True,
     nullable=False,
     help="User email address.",
 )
-
-password_arg = Argument(
+auth_reqparser.add_argument(
     name="password",
-    dest="password",
     type=str,
     location="form",
     required=True,
     nullable=False,
     help="User password.",
 )
-
-user_reqparser = reqparse.RequestParser(bundle_errors=True)
-user_reqparser.add_argument(email_arg)
-user_reqparser.add_argument(password_arg)
 
 user_model = auth_ns.model(
     "User",

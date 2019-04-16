@@ -13,7 +13,7 @@ def admin_token_required(f):
         user_dict = check_auth_token()
         if not user_dict["admin"]:
             error = "You are not authorized to perform the requested action."
-            abort(HTTPStatus.UNAUTHORIZED, error, status="fail")
+            abort(HTTPStatus.FORBIDDEN, error, status="fail")
         return f(*args, **kwargs)
 
     return decorated

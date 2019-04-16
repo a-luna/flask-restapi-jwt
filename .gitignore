@@ -1,7 +1,6 @@
 .env
 .flaskenv
 .vscode
-app/static/*
 tmp
 venv
 *.rdb

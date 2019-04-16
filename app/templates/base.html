@@ -1,0 +1,34 @@
+{% extends 'bootstrap/base.html' %} {% block html_attribs %} lang="en" ng-app="SecureLoginApp"{% endblock %} {% block title %}{{ title }} | Encrypted Login/Registration Tool{% endblock %} {% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}"> {% endblock %} {% block body_attribs%} ng-controller="SecureLoginController"{% endblock %} {% block content %}
+<div class="container">
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <ul>
+            {% for message in messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %} {% endwith %}
+    </div>
+    <div class="flex-container">
+        <div class="flex-item-empty"></div>
+        <div class="flex-item-banner banner">
+            {% if banner %}
+            <h2 class="banner">{{ banner }}</h2>
+            {% else %}
+            <h2 class="banner">Encrypted Login/Registration Tool</h2>
+            {% endif %}
+        </div>
+        <div class="flex-item-api-link">
+            <a href="/api/v1/ui">API Docs <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </div>
+    </div>
+    {% block grid_rows %} {% endblock %}
+</div>
+{% endblock %} {% block scripts %}
+<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/angular.min.js') }}"></script>
+{% endblock %}

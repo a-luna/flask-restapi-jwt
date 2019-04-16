@@ -7,14 +7,22 @@ from flask_restplus import abort
 from app import db
 from app.models.blacklist_token import BlacklistToken
 from app.models.user import User
+from app.util.crypto import decrypt_user_credentials
+from app.util.result import Result
 
 
 def register_new_user(data):
-    if User.find_by_email(data["email"]):
-        error = f'"{data["email"]}" is already registered. Please Log in.'
+    result = decrypt_user_credentials(data["key"], data["iv"], data["ct"])
+    if result.failure:
+        abort(HTTPStatus.UNAUTHORIZED, result.error, status="fail")
+    user_credentials = result.value
+    if User.find_by_email(user_credentials["email"]):
+        error = f"{user_credentials['email']} is already registered. Please Log in."
         abort(HTTPStatus.CONFLICT, error, status="fail")
     try:
-        new_user = User(email=data["email"], password=data["password"])
+        new_user = User(
+            email=user_credentials["email"], password=user_credentials["password"]
+        )
         db.session.add(new_user)
         db.session.commit()
         return generate_token(new_user)
@@ -28,7 +36,7 @@ def generate_token(user):
         auth_token = user.encode_auth_token()
         response_data = dict(
             status="success",
-            message="Successfully registered.",
+            message="Successfully registered",
             email=user.email,
             public_id=user.public_id,
             Authorization=auth_token.decode(),
@@ -40,12 +48,16 @@ def generate_token(user):
 
 
 def process_login(data):
-    user = User.find_by_email(data["email"])
-    if user and user.check_password(data["password"]):
+    result = decrypt_user_credentials(data["key"], data["iv"], data["ct"])
+    if result.failure:
+        abort(HTTPStatus.UNAUTHORIZED, result.error, status="fail")
+    user_credentials = result.value
+    user = User.find_by_email(user_credentials["email"])
+    if user and user.check_password(user_credentials["password"]):
         auth_token = user.encode_auth_token()
         response_data = dict(
             status="success",
-            message="Successfully logged in.",
+            message="Successfully logged in",
             user=user.public_id,
             Authorization=auth_token.decode(),
         )
