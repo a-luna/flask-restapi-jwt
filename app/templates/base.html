@@ -12,18 +12,12 @@
         </ul>
         {% endif %} {% endwith %}
     </div>
-    <div class="flex-container">
-        <div class="flex-item-empty"></div>
-        <div class="flex-item-banner banner">
-            {% if banner %}
-            <h2 class="banner">{{ banner }}</h2>
-            {% else %}
-            <h2 class="banner">Encrypted Login/Registration Tool</h2>
-            {% endif %}
-        </div>
-        <div class="flex-item-api-link">
-            <a href="/api/v1/ui">API Docs <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
-        </div>
+    <div class="banner">
+        {% if banner %}
+        <h2>{{ banner }}</h2>
+        {% else %}
+        <h2 class="banner">Secure Login/Registration Tool</h2>
+        {% endif %}
     </div>
     {% block grid_rows %} {% endblock %}
 </div>

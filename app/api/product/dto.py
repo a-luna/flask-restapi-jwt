@@ -91,8 +91,19 @@ put_product_parser.add_argument(
     store_missing=False,
 )
 
-product_api_model = product_ns.model(
+product_overview = product_ns.model(
     "Product",
+    {
+        "product_name": fields.String,
+        "newest_version_number": fields.String,
+        "download_url": fields.String,
+        "last_update": fields.String(attribute="last_update_str"),
+        "last_checked": fields.String(attribute="last_checked_str"),
+    },
+)
+
+product_detail = product_ns.model(
+    "Product Detail",
     {
         "product_name": fields.String,
         "release_info_url": fields.String,
@@ -103,27 +114,17 @@ product_api_model = product_ns.model(
         "last_update": fields.String(attribute="last_update_str"),
         "last_checked": fields.String(attribute="last_checked_str"),
     },
-    mask=(
-        "{"
-        "product_name, "
-        "newest_version_number, "
-        "download_url, "
-        "last_update, "
-        "last_checked}"
-    ),
 )
 
 pagination_parser = reqparse.RequestParser(bundle_errors=True)
+pagination_parser.add_argument(name="page", type=int, required=False, default=1)
 pagination_parser.add_argument(
-    "page", type=int, required=False, default=1, help="Page number"
-)
-pagination_parser.add_argument(
-    "per_page",
+    name="items_per_page",
+    dest="per_page",
     type=int,
     required=False,
     choices=[5, 10, 25, 50, 100],
     default=10,
-    help="Results per page {error_msg}",
 )
 
 pagination_api_model = product_ns.model(
@@ -133,6 +134,6 @@ pagination_api_model = product_ns.model(
         "total_pages": fields.Integer(attribute="pages"),
         "items_per_page": fields.Integer(attribute="per_page"),
         "total_items": fields.Integer(attribute="total"),
-        "items": fields.List(fields.Nested(product_api_model)),
+        "items": fields.List(fields.Nested(product_overview)),
     },
 )

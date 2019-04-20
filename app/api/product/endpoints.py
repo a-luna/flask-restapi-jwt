@@ -15,7 +15,8 @@ from app.api.product.dto import (
     post_product_parser,
     put_product_parser,
     pagination_parser,
-    product_api_model,
+    product_overview,
+    product_detail,
     pagination_api_model,
 )
 from app.models.product import Product as ProductModel
@@ -69,7 +70,7 @@ class Product(Resource):
         "Retrieve a product.", responses={HTTPStatus.NOT_FOUND: "Product not found."}
     )
     @product_ns.marshal_with(
-        product_api_model,
+        product_overview,
         code=HTTPStatus.OK,
         description="Successfully retrieved product.",
     )
@@ -90,8 +91,7 @@ class Product(Resource):
     )
     @product_ns.expect(put_product_parser, validate=True)
     @product_ns.marshal_with(
-        product_api_model,
-        mask="*",
+        product_detail,
         code=HTTPStatus.OK,
         description="Successfully retrieved product.",
     )

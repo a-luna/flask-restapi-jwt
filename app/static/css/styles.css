@@ -28,7 +28,7 @@ body {
     font-size: 1em;
     background-color: #FDF6E4;
     padding: 0em !important;
-    margin: 0em auto !important;
+    margin: 0em auto 1em !important;
     max-width: 1000px !important;
     width: 95% !important;
 }
@@ -42,17 +42,17 @@ div.flash-messages {
 }
 
 div.banner {
-    width: 100%;
-    margin: 0;
+    margin: 0 1em 1em;
     padding: 0;
 }
 
-h2.banner {
-    margin: 0;
+.banner h2 {
+    font-size: 1.3em;
+    max-width: 500px;
+    margin: 0 auto;
 }
 
 .banner {
-    font-size: 1.25em;
     text-align: center;
     background-color: #FDF6E4;
     color: #564A29;
@@ -60,55 +60,74 @@ h2.banner {
     letter-spacing: 1.3px;
 }
 
+.flex-wrapper {
+    margin: 0 1em;
+}
+
 .flex-container {
+    max-width: 500px;
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
     align-items: center;
-    align-content: stretch;
-    margin: 0 1em;
+    text-align: center;
+    margin: 0 auto;
 }
 
-.flex-item-banner {
-    flex: 1 1 max-content;
+#toggle {
+    text-align: center;
+    margin: 0 15px 0 0;
 }
 
-.flex-item-empty {
-    flex: 0 0 170px;
-    text-align: left;
+#toggle input {
+    width: auto;
 }
 
-.flex-item-api-link {
-    flex: 0 0 170px;
+#toggle label {
+    font-size: 0.8em;
+}
+
+.api-link {
     text-align: right;
-    font-size: 0.95em;
+}
+
+.api-link a {
+    font-size: 1em;
     font-weight: 700;
 }
 
-.flex-item-api-link a,
-.flex-item-api-link a:hover,
-.flex-item-api-link a:active,
-.flex-item-api-link a:focus,
-.flex-item-api-link a:active:hover {
-    color: #FC4820;
+.api-link a,
+.api-link a:hover,
+.api-link a:active,
+.api-link a:focus,
+.api-link a:active:hover {
+    color: #9012fe;
     text-decoration: none;
 }
 
+.api-link a:hover,
+.api-link a:active,
+.api-link a:focus,
+.api-link a:active:hover {
+    text-decoration: underline;
+}
+
 .row {
-    margin: 0 0.5em;
+    margin: 0.5em 1em 1em;
 }
 
 .card {
-    padding: 0.5em 1em;
-    margin: 0.5em 0.5em 0;
-    background-color: #D3CBB8;
     border: 1px solid #564A29;
     border-radius: 4px;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0.5em 1em;
+    background-color: #D3CBB8;
 }
 
 #login .card,
 #registration .card {
-    max-width: 400px;
+    max-width: 500px;
     margin: 0 auto;
 }
 
@@ -224,6 +243,30 @@ input[type=submit]:focus {
     background-color: #CCAC5E;
 }
 
+label.btn-default,
+label.btn-primary {
+    font-size: 1.1em;
+    font-weight: 400;
+    color: #B0851C;
+    border: 1px solid #B0851C;
+    background-color: #FDF6E4;
+    border-radius: 5px;
+}
+
+label.btn-default:hover,
+label.btn-default:active,
+label.btn-default.active,
+label.btn.btn-default.active,
+label.btn-default:focus,
+label.btn-default:active:hover,
+label.btn-default.active:hover,
+label.btn-default.active:focus {
+    color: #FDF6E4;
+    border: 1px solid #B0851C;
+    border-color: #B0851C;
+    background-color: #B0851C;
+}
+
 .hide-element {
     display: none;
 }
@@ -232,24 +275,31 @@ input[type=submit]:focus {
     display: block;
 }
 
+#auth-result-wrapper {
+    margin: 0 1em;
+}
+
 div#auth-error,
 div#auth-success {
+    max-width: 500px;
     text-align: center;
     background-color: #FDF6E4;
-    margin: 0.5em 0;
-    padding: 0.25em;
+    margin: 0 auto;
+    padding: 0;
 }
 
 div#auth-error {
     color: #E91E63;
-    width: fit-content;
-    margin: 0.25em auto;
 }
 
 div#auth-success {
-    color: #0B24FB;
+    color: #52c222;
     font-size: 0.85em;
-    margin: 0.5em 1em 0;
+}
+
+#auth-success p.api-link {
+    margin: 1em 0;
+    text-align: center;
 }
 
 #auth-success a,
@@ -257,34 +307,52 @@ div#auth-success {
 #auth-success a:active,
 #auth-success a:focus,
 #auth-success a:active:hover {
-    color: #FC4820;
+    color: #9012fe;
     text-decoration: none;
-    font-weight: 900;
+    font-size: 1.2em;
+    font-weight: 700;
+}
+
+#auth-success a:hover,
+#auth-success a:active,
+#auth-success a:focus,
+#auth-success a:active:hover {
+    text-decoration: underline;
 }
 
 #auth-error-type,
 #auth-success-type {
     display: block;
+    width: max-content;
     font-weight: 900;
-    font-size: 1.8em;
+    font-size: 1.4em;
     line-height: 1.2em;
     padding: 5px 10px;
-    margin: 0;
+    margin: 0 auto;
+}
+
+#auth-success-type {
+    border: 3px solid #52b129;
 }
 
 #auth-error-type {
-    font-size: 1.4em;
     border: 3px solid #E91E63;
-    width: max-content;
-    margin: 0;
 }
 
 #auth-error-message,
 #auth-success-message {
     font-weight: 700;
-    font-size: 0.9em;
+    font-size: 0.8em;
     text-align: center;
+    margin: 1em 0 0;
+}
+
+div.responsive {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: auto;
     margin: 0.5em 0;
+    padding: 0;
 }
 
 #auth-token {
@@ -295,8 +363,8 @@ div#auth-success {
     text-align: left;
     word-break: break-all;
     word-wrap: normal;
-    color: #0B24FB;
-    border: 1px solid #0B24FB;
+    color: #564A29;
+    border: 1px solid #564A29;
     background: #D3CBB8;
     border-radius: 4px;
     width: auto;
@@ -308,23 +376,59 @@ div#auth-success {
     background: none;
 }
 
-@media screen and (min-width: 767px) {
-    .row {
-        display: flex;
-        margin: 0 0.5em;
-    }
-    .column {
-        flex: 1;
-    }
-}
-
 @media screen and (max-width: 767px) {
-    h2.banner {
-        font-size: 0.9em;
-        margin: 0.25em 0;
+    div.banner {
+        margin: 0 1em 0.7em;
+    }
+    .banner h2 {
+        font-size: 1em;
+        max-width: 400px
+    }
+    .flex-container {
+        max-width: 400px;
+    }
+    #toggle {
+        margin: 0 0 5px 0;
+    }
+    .card,
+    div#auth-error,
+    div#auth-success {
+        max-width: 400px;
+    }
+    #toggle label {
+        font-size: 0.65em;
+    }
+    #toggle .btn {
+        padding: 4px 8px;
+    }
+    .api-link a {
+        font-size: 0.8em;
     }
     #login p,
     #registration p {
         font-size: 0.9em;
+        max-width: 400px
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .flex-container {
+        font-size: 0.8em;
+    }
+    .banner h2 {
+        font-size: 0.8em;
+    }
+}
+
+@media screen and (max-width: 325px) {
+    .flex-container {
+        flex-flow: row wrap;
+        justify-content: center;
+    }
+    #toggle {
+        margin: 0 10px 5px;
+    }
+    .banner h2 {
+        font-size: 0.8em;
     }
 }

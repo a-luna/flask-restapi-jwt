@@ -17,6 +17,5 @@ def secure_auth():
     return render_template(
         "auth.html",
         title="Secure Authorization Tool",
-        banner="Secure Authorization Tool",
         public_key=public_key,
     )

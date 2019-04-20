@@ -1,8 +1,22 @@
 {% extends "base.html" %} {% block grid_rows %}
+<div class="flex-wrapper">
+    <div class="flex-container">
+        <div id="toggle" class="btn-group btn-group-toggle flex-item" data-toggle="buttons">
+            <label id="toggle-login" class="btn btn-default active" ng-click="displayLoginForm()">
+                <input type="radio" name="options" id="toggleLogin" autocomplete="off" checked />Login
+            </label>
+            <label id="toggle-register" class="btn btn-default" ng-click="displayRegistrationForm()">
+                <input type="radio" name="options" id="toggleRegister" autocomplete="off" />Register
+            </label>
+        </div>
+        <div class="api-link flex-item">
+            <a href="/api/v1/ui">Go to API Documentation <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </div>
+    </div>
+</div>
 <div id="secure-auth" class="row" data-public-key="{{ public_key }}">
     <div id="login" class="column column-1 card">
         <form role="form">
-            <p>Existing User? Login</p>
             <div class="form-group">
                 <label for="login-email">Email
                     <input id="login-email" name="login-email" class="form-control" type="text" ng-model="loginEmail"
@@ -20,9 +34,8 @@
             </div>
         </form>
     </div>
-    <div id="registration" class="column column-1 card">
+    <div id="registration" class="column column-1 card hide-element">
         <form role="form">
-            <p>New User? Register</p>
             <div class="form-group">
                 <label for="register-email">Email
                     <input id="register-email" name="register-email" class="form-control" type="text"
@@ -45,17 +58,24 @@
         </form>
     </div>
 </div>
-<div id="auth-success" class="hide-element">
-    {% raw %}
-    <p id="auth-success-type">{{ authSuccessType }}</p>
-    <p id="auth-success-message">Use the token below with any <a href="/api/v1/ui">API method</a> that requires authorization:
-    </p>
-    <pre id="auth-token"><code>{{ authToken }}</code></pre> {% endraw %}
-</div>
-<div id="auth-error" class="hide-element">
-    {% raw %}
-    <p id="auth-error-type">{{ authErrorType }}</p>
-    {% endraw %}
+<div id="auth-result-wrapper" class="hide-element">
+    <div id="auth-success" class="hide-element">
+        {% raw %}
+        <p id="auth-success-type">{{ authSuccessType }}</p>
+        <p id="auth-success-message">Use the token below with any API method that requires authorization:
+        </p>
+        <div class="responsive">
+            <pre id="auth-token"><code>{{ authToken }}</code></pre>
+        </div> {% endraw %}
+        <p class="api-link">
+            <a href="/api/v1/ui">Go to API Documentation <i class="fa fa-arrow-right" aria-hidden="true"></i></a>
+        </p>
+    </div>
+    <div id="auth-error" class="hide-element">
+        {% raw %}
+        <p id="auth-error-type">{{ authErrorType }}</p>
+        {% endraw %}
+    </div>
 </div>
 {% endblock %} {% block scripts %} {{ super() }}
 <script src="{{ url_for('static', filename='js/auth.js') }}"></script>

@@ -2,6 +2,7 @@
 from datetime import datetime
 from http import HTTPStatus
 
+from flask import jsonify
 from flask_restplus import abort
 
 from app import db
@@ -32,11 +33,12 @@ def create_product(data):
         db.session.add(new_product)
         db.session.commit()
         response_object = dict(
-            status="success",
-            message=f"New product added: {product_name}.",
-            location=f"/api/v1/product/{product_name}",
+            status="success", message=f"New product added: {product_name}."
         )
-        return response_object, HTTPStatus.CREATED
+        response = jsonify(response_object)
+        response.status_code = HTTPStatus.CREATED
+        response.headers["Location"] = f"/api/v1/product/{product_name}"
+        return response
     except Exception as e:
         error = f"Error: {repr(e)}"
         abort(HTTPStatus.INTERNAL_SERVER_ERROR, error, status="fail")

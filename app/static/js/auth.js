@@ -6,6 +6,16 @@
 
             function($scope, $log, $http, $timeout) {
 
+                $scope.displayLoginForm = function() {
+                    $('#registration').toggleClass('hide-element', true);
+                    $('#login').toggleClass('hide-element', false);
+                }
+
+                $scope.displayRegistrationForm = function() {
+                    $('#login').toggleClass('hide-element', true);
+                    $('#registration').toggleClass('hide-element', false);
+                }
+
                 $scope.userLogin = function() {
                     var email = $scope.loginEmail;
                     var password = $scope.loginPassword;
@@ -31,9 +41,18 @@
 
                 function secureAuth(email, password, auth_type) {
                     generateSessionKey()
-                        .then((sessionKey) => encryptUserCredentials(sessionKey, email, password))
-                        .then((sessionKey) => encryptSessionKey(sessionKey))
-                        .then((encryptedSessionKeyBase64) => submitUserAuth(auth_type, encryptedSessionKeyBase64))
+                        .then((key) => encryptUserCredentials(key, email, password))
+                        .then(([key, iv, ct]) => encryptSessionKey(key, iv, ct))
+
+                    .then(([enc_key, iv, ct]) => {
+                            if (auth_type == "register") {
+                                postRegistrationRequest(enc_key, iv, ct)
+                            } else if (auth_type == "login") {
+                                postLoginRequest(enc_key, iv, ct)
+                            } else {
+                                throw Error('Unkown auth type:' + auth_type);
+                            }
+                        })
                         .catch(function(err) {
                             alert("Error: " + err.message);
                         });
@@ -53,7 +72,7 @@
                     var ivBytes = window.crypto.getRandomValues(new Uint8Array(16));
                     var plainText = email + ":" + password;
                     var plainTextBytes = stringToByteArray(plainText);
-                    $scope.ivBase64 = byteArrayToBase64(ivBytes);
+                    var ivBase64 = byteArrayToBase64(ivBytes);
 
                     return window.crypto.subtle.encrypt({
                             name: "AES-CBC",
@@ -63,13 +82,13 @@
                         plainTextBytes
                     ).then(function(ciphertextBuffer) {
                         var cipherTextBytes = new Uint8Array(ciphertextBuffer);
-                        $scope.cipherTextBase64 = byteArrayToBase64(cipherTextBytes);
+                        var cipherTextBase64 = byteArrayToBase64(cipherTextBytes);
 
-                        return sessionKey;
+                        return [sessionKey, ivBase64, cipherTextBase64];
                     });
                 };
 
-                const encryptSessionKey = function(sessionKey) {
+                const encryptSessionKey = function(sessionKey, ivBase64, cipherTextBase64) {
                     var secureAuthDiv = document.getElementById('secure-auth');
                     var publicKeyHexString = secureAuthDiv.dataset.publicKey;
                     var publicKeyBytes = hexStringToByteArray(publicKeyHexString);
@@ -96,7 +115,7 @@
                                 var encryptedSessionKeyBytes = new Uint8Array(encryptedSessionKeyBuffer);
                                 var encryptedSessionKeyBase64 = byteArrayToBase64(encryptedSessionKeyBytes);
 
-                                return encryptedSessionKeyBase64;
+                                return [encryptedSessionKeyBase64, ivBase64, cipherTextBase64];
 
                             }).catch(function(err) {
                                 alert("Error occurred encrypting session key: " + err.message);
@@ -111,27 +130,21 @@
                     });
                 }
 
-                const submitUserAuth = function(auth_type, encryptedSessionKeyBase64) {
-                    var endpoint = "";
-                    if (auth_type == "register") {
-                        endpoint = "/api/v1/auth/register"
-                    } else if (auth_type == "login") {
-                        endpoint = "/api/v1/auth/login"
-                    }
-
+                const postRegistrationRequest = function(enc_key, iv, ct) {
                     $http.post(
-                        endpoint, {
-                            'key': encryptedSessionKeyBase64,
-                            'iv': $scope.ivBase64,
-                            'ct': $scope.cipherTextBase64
+                        "/api/v1/auth/register", {
+                            'key': enc_key,
+                            'iv': iv,
+                            'ct': ct
                         }
                     ).then(successCallback, errorCallback);
 
                     function successCallback(response) {
-                        $scope.authSuccessType = response.data['message'];
+                        $scope.authSuccessType = "SUCCESS";
                         $scope.authToken = response.data['Authorization'];
                         $('#auth-error').toggleClass('hide-element', true);
                         $('#auth-success').toggleClass('hide-element', false);
+                        $('#auth-result-wrapper').toggleClass('hide-element', false);
                         return Promise.resolve();
                     }
 
@@ -145,6 +158,38 @@
                         }
                         $('#auth-success').toggleClass('hide-element', true);
                         $('#auth-error').toggleClass('hide-element', false);
+                        $('#auth-result-wrapper').toggleClass('hide-element', false);
+                        return Promise.reject(response.data);
+                    }
+                }
+
+                const postLoginRequest = function(enc_key, iv, ct) {
+                    $http.post(
+                        "/api/v1/auth/login", {
+                            'key': enc_key,
+                            'iv': iv,
+                            'ct': ct
+                        }
+                    ).then(successCallback, errorCallback);
+
+                    function successCallback(response) {
+                        $scope.authSuccessType = "SUCCESS";
+                        $scope.authToken = response.data['Authorization'];
+                        $('#auth-error').toggleClass('hide-element', true);
+                        $('#auth-success').toggleClass('hide-element', false);
+                        $('#auth-result-wrapper').toggleClass('hide-element', false);
+                        return Promise.resolve();
+                    }
+
+                    function errorCallback(response) {
+                        if (response.status == 401) {
+                            $scope.authErrorType = "UNAUTHORIZED";
+                        } else {
+                            $scope.authErrorType = "SERVER ERROR";
+                        }
+                        $('#auth-success').toggleClass('hide-element', true);
+                        $('#auth-error').toggleClass('hide-element', false);
+                        $('#auth-result-wrapper').toggleClass('hide-element', false);
                         return Promise.reject(response.data);
                     }
                 }

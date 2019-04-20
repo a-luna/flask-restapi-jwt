@@ -1,4 +1,5 @@
 """Unit tests for /auth API endpoints."""
+import json
 import time
 import unittest
 from http import HTTPStatus
@@ -6,6 +7,7 @@ from http import HTTPStatus
 from app import db
 from app.models.blacklist_token import BlacklistToken
 from app.models.user import User
+from app.util.crypto import encrypt_user_credentials
 from test.base import BaseTestCase
 
 
@@ -13,7 +15,7 @@ def register_user_happy_path(self):
     register_response = register_user(self, "new_user@email.com", "test1234")
     register_data = register_response.get_json()
     self.assertEqual(register_data["status"], "success")
-    self.assertEqual(register_data["message"], "Successfully registered.")
+    self.assertEqual(register_data["message"], "Successfully registered")
     self.assertIsNotNone(register_data["Authorization"])
     self.assertEqual(register_response.content_type, "application/json")
     self.assertEqual(register_response.status_code, HTTPStatus.CREATED)
@@ -24,7 +26,7 @@ def login_user_heppy_path(self):
     login_response = login_user(self, "new_user@email.com", "test1234")
     login_data = login_response.get_json()
     self.assertEqual(login_data["status"], "success")
-    self.assertEqual(login_data["message"], "Successfully logged in.")
+    self.assertEqual(login_data["message"], "Successfully logged in")
     self.assertIsNotNone(login_data["Authorization"])
     self.assertEqual(login_response.content_type, "application/json")
     self.assertEqual(login_response.status_code, HTTPStatus.OK)
@@ -32,20 +34,26 @@ def login_user_heppy_path(self):
 
 
 def register_user(self, email, password):
-    form_data = f"email={email}&password={password}"
+    result = encrypt_user_credentials(email, password)
+    if result.failure:
+        self.fail(f"Error: {repr(result.error)}")
+    enc_user_creds = result.value
     return self.client.post(
         "api/v1/auth/register",
-        data=form_data,
-        content_type="application/x-www-form-urlencoded",
+        data=json.dumps(enc_user_creds),
+        content_type="application/json",
     )
 
 
 def login_user(self, email, password):
-    form_data = f"email={email}&password={password}"
+    result = encrypt_user_credentials(email, password)
+    if result.failure:
+        self.fail(f"Error: {repr(result.error)}")
+    enc_user_creds = result.value
     return self.client.post(
         "api/v1/auth/login",
-        data=form_data,
-        content_type="application/x-www-form-urlencoded",
+        data=json.dumps(enc_user_creds),
+        content_type="application/json",
     )
 
 
@@ -75,7 +83,7 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertEqual(register_data["status"], "fail")
             self.assertEqual(
                 register_data["message"],
-                '"new_user@email.com" is already registered. Please Log in.',
+                "new_user@email.com is already registered. Please Log in.",
             )
             self.assertEqual(register_response.content_type, "application/json")
             self.assertEqual(register_response.status_code, HTTPStatus.CONFLICT)
@@ -237,21 +245,6 @@ class TestAuthBlueprint(BaseTestCase):
                 logout_data["message"], "Invalid token. Please log in again."
             )
             self.assertEqual(logout_response.status_code, HTTPStatus.UNAUTHORIZED)
-
-    def test_auth(self):
-        import json
-        from base64 import standard_b64decode, standard_b64encode
-        from app.util.crypto import encrypt_user_credentials, decrypt_user_credentials
-
-        email = "aaronluna@gmail.com"
-        password = "123456"
-        result = encrypt_user_credentials(email, password)
-
-        b64 = json.loads(result.value)
-        result = decrypt_user_credentials(b64["key"], b64["iv"], b64["ct"])
-        creds_dict = result.value
-
-        satan = 666
 
 
 if __name__ == "__main__":

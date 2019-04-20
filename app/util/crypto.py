@@ -15,9 +15,6 @@ from app.util.result import Result
 from create_pem import construct_rsa_key
 
 
-B64_STANDARD = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
-
-
 def get_private_key():
     """Return RSA key used to sign auth tokens in PEM format."""
     result = construct_rsa_key()
@@ -48,6 +45,27 @@ def get_public_key_hex():
     public_key_b64 = b"".join(split[1 : len(split) - 1])
     public_key_bytes = standard_b64decode(public_key_b64)
     return Result.Ok(public_key_bytes.hex())
+
+
+def encrypt_user_credentials(email, password):
+    result = construct_rsa_key()
+    if not result["success"]:
+        return Result.Fail(result["error"])
+    key = result["value"]
+    public_key = key.publickey()
+    session_key = get_random_bytes(16)
+    cipher_rsa = PKCS1_OAEP.new(public_key, hashAlgo=SHA256)
+    encrypted_key = cipher_rsa.encrypt(session_key)
+
+    cipher_aes = AES.new(session_key, AES.MODE_CBC)
+    plaintext = f"{email}:{password}"
+    ciphertext = cipher_aes.encrypt(pad(plaintext.encode(), AES.block_size))
+
+    key = standard_b64encode(encrypted_key).decode("utf-8")
+    iv = standard_b64encode(cipher_aes.iv).decode("utf-8")
+    ct = standard_b64encode(ciphertext).decode("utf-8")
+    enc_user_creds = dict(key=key, iv=iv, ct=ct)
+    return Result.Ok(enc_user_creds)
 
 
 def decrypt_user_credentials(encoded_key, encoded_iv, encoded_ct):
