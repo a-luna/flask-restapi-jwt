@@ -15,7 +15,7 @@ def create_admin_user_and_sign_in(self):
     register_response = register_user(self, "admin@email.com", "test1234")
     register_data = register_response.get_json()
     self.assertEqual(register_data["status"], "success")
-    self.assertEqual(register_data["message"], "Successfully registered.")
+    self.assertEqual(register_data["message"], "Successfully registered")
     self.assertIsNotNone(register_data["Authorization"])
     self.assertEqual(register_response.content_type, "application/json")
     self.assertEqual(register_response.status_code, HTTPStatus.CREATED)
@@ -27,7 +27,7 @@ def create_admin_user_and_sign_in(self):
     login_response = login_user(self, "admin@email.com", "test1234")
     login_data = login_response.get_json()
     self.assertEqual(login_data["status"], "success")
-    self.assertEqual(login_data["message"], "Successfully logged in.")
+    self.assertEqual(login_data["message"], "Successfully logged in")
     self.assertIsNotNone(login_data["Authorization"])
     self.assertEqual(login_response.content_type, "application/json")
     self.assertEqual(login_response.status_code, HTTPStatus.OK)
@@ -38,7 +38,7 @@ def create_regular_user_and_sign_in(self):
     register_response = register_user(self, "site_user@email.com", "test5678")
     register_data = register_response.get_json()
     self.assertEqual(register_data["status"], "success")
-    self.assertEqual(register_data["message"], "Successfully registered.")
+    self.assertEqual(register_data["message"], "Successfully registered")
     self.assertIsNotNone(register_data["Authorization"])
     self.assertEqual(register_response.content_type, "application/json")
     self.assertEqual(register_response.status_code, HTTPStatus.CREATED)
@@ -50,7 +50,7 @@ def create_regular_user_and_sign_in(self):
     login_response = login_user(self, "site_user@email.com", "test5678")
     login_data = login_response.get_json()
     self.assertEqual(login_data["status"], "success")
-    self.assertEqual(login_data["message"], "Successfully logged in.")
+    self.assertEqual(login_data["message"], "Successfully logged in")
     self.assertIsNotNone(login_data["Authorization"])
     self.assertEqual(login_response.content_type, "application/json")
     self.assertEqual(login_response.status_code, HTTPStatus.OK)
@@ -78,7 +78,8 @@ def create_product_happy_path(
     self.assertEqual(
         create_product_data["message"], f"New product added: {product_name}."
     )
-    self.assertEqual(create_product_data["location"], f"/api/v1/product/{product_name}")
+    location_header = create_product_response.headers.get("Location")
+    self.assertTrue(location_header.endswith(f"/api/v1/product/{product_name}"))
     self.assertEqual(create_product_response.content_type, "application/json")
     self.assertEqual(create_product_response.status_code, HTTPStatus.CREATED)
     product = Product.find_by_name(product_name)
@@ -306,7 +307,7 @@ class TestProductBlueprint(BaseTestCase):
             )
             self.assertEqual(create_product_response.content_type, "application/json")
             self.assertEqual(
-                create_product_response.status_code, HTTPStatus.UNAUTHORIZED
+                create_product_response.status_code, HTTPStatus.FORBIDDEN
             )
 
     def test_retrieve_all_products(self):
@@ -525,7 +526,7 @@ class TestProductBlueprint(BaseTestCase):
             )
             self.assertEqual(update_product_response.content_type, "application/json")
             self.assertEqual(
-                update_product_response.status_code, HTTPStatus.UNAUTHORIZED
+                update_product_response.status_code, HTTPStatus.FORBIDDEN
             )
 
     def test_delete_product(self):

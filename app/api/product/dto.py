@@ -117,14 +117,9 @@ product_detail = product_ns.model(
 )
 
 pagination_parser = reqparse.RequestParser(bundle_errors=True)
-pagination_parser.add_argument(name="page", type=int, required=False, default=1)
+pagination_parser.add_argument("page", type=int, required=False, default=1)
 pagination_parser.add_argument(
-    name="items_per_page",
-    dest="per_page",
-    type=int,
-    required=False,
-    choices=[5, 10, 25, 50, 100],
-    default=10,
+    "per_page", type=int, required=False, choices=[5, 10, 25, 50, 100], default=10
 )
 
 pagination_api_model = product_ns.model(
