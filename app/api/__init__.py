@@ -91,7 +91,7 @@ api = Api(
 )
 
 from app.api.auth import auth_ns
-from app.api.product import product_ns
+from app.api.products import product_ns
 
 api.add_namespace(auth_ns, path="/auth")
-api.add_namespace(product_ns, path="/product")
+api.add_namespace(product_ns, path="/products")

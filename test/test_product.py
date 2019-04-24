@@ -1,6 +1,6 @@
 """Unit tests for /product API endpoints."""
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 from app import db
@@ -79,7 +79,7 @@ def create_product_happy_path(
         create_product_data["message"], f"New product added: {product_name}."
     )
     location_header = create_product_response.headers.get("Location")
-    self.assertTrue(location_header.endswith(f"/api/v1/product/{product_name}"))
+    self.assertTrue(location_header.endswith(f"/api/v1/products/{product_name}"))
     self.assertEqual(create_product_response.content_type, "application/json")
     self.assertEqual(create_product_response.status_code, HTTPStatus.CREATED)
     product = Product.find_by_name(product_name)
@@ -148,7 +148,7 @@ def create_product(
         f"xpath_download_url={xpath_download_url}"
     )
     return self.client.post(
-        "api/v1/product/",
+        "api/v1/products/",
         headers=dict(Authorization=f"Bearer {jwt_auth}"),
         data=request_data,
         content_type="application/x-www-form-urlencoded",
@@ -156,12 +156,14 @@ def create_product(
 
 
 def retrieve_product(self, product_name):
-    return self.client.get(f"api/v1/product/{product_name}")
+    return self.client.get(f"api/v1/products/{product_name}")
 
 
 def retrieve_all_products(self, page_num, per_page):
-    query = f"page={page_num}&per_page={per_page}"
-    return self.client.get(f"api/v1/product/?{query}")
+    url = f"api/v1/products/?page={page_num}&per_page={per_page}"
+    if not page_num and not per_page:
+        url = "api/v1/products/"
+    return self.client.get(url)
 
 
 def update_product(
@@ -178,7 +180,7 @@ def update_product(
         f"xpath_download_url={xpath_download_url}"
     )
     return self.client.put(
-        f"api/v1/product/{product_name}",
+        f"api/v1/products/{product_name}",
         headers=dict(Authorization=f"Bearer {jwt_auth}"),
         data=request_data,
         content_type="application/x-www-form-urlencoded",
@@ -187,7 +189,7 @@ def update_product(
 
 def delete_product(self, product_name, jwt_auth):
     return self.client.delete(
-        f"api/v1/product/{product_name}",
+        f"api/v1/products/{product_name}",
         headers=dict(Authorization=f"Bearer {jwt_auth}"),
         content_type="application/x-www-form-urlencoded",
     )
@@ -264,7 +266,7 @@ class TestProductBlueprint(BaseTestCase):
                 f"xpath_version_number={xpath_version_number}"
             )
             create_product_response = self.client.post(
-                "api/v1/product/",
+                "api/v1/products/",
                 headers=dict(Authorization=f"Bearer {jwt_auth}"),
                 data=request_data,
                 content_type="application/x-www-form-urlencoded",
@@ -361,76 +363,54 @@ class TestProductBlueprint(BaseTestCase):
             "//prod[6]/@href",
             jwt_auth,
         )
-        retrive_page_1_and_5_per_page_response = retrieve_all_products(self, 1, 5)
-        retrive_page_1_and_5_per_page_data = (
-            retrive_page_1_and_5_per_page_response.get_json()
-        )
-        self.assertEqual(retrive_page_1_and_5_per_page_data["page"], 1)
-        self.assertEqual(retrive_page_1_and_5_per_page_data["total_pages"], 2)
-        self.assertEqual(retrive_page_1_and_5_per_page_data["items_per_page"], 5)
-        self.assertEqual(retrive_page_1_and_5_per_page_data["total_items"], 7)
-        self.assertEqual(
-            retrive_page_1_and_5_per_page_data["items"][0]["product_name"],
-            "python_v3_7",
-        )
-        self.assertEqual(
-            retrive_page_1_and_5_per_page_data["items"][1]["product_name"], "product_1"
-        )
-        self.assertEqual(
-            retrive_page_1_and_5_per_page_data["items"][2]["product_name"], "product_2"
-        )
-        self.assertEqual(
-            retrive_page_1_and_5_per_page_data["items"][3]["product_name"], "product_3"
-        )
-        self.assertEqual(
-            retrive_page_1_and_5_per_page_data["items"][4]["product_name"], "product_4"
-        )
+        retrieve_page_1_per_5_response = retrieve_all_products(self, page_num=1, per_page=5)
+        retrieve_page_1_per_5_data = retrieve_page_1_per_5_response.get_json()
+        self.assertEqual(retrieve_page_1_per_5_data["page"], 1)
+        self.assertEqual(retrieve_page_1_per_5_data["total_pages"], 2)
+        self.assertEqual(retrieve_page_1_per_5_data["items_per_page"], 5)
+        self.assertEqual(retrieve_page_1_per_5_data["total_items"], 7)
+        self.assertEqual(retrieve_page_1_per_5_data["items"][0]["product_name"], "python_v3_7")
+        self.assertEqual(retrieve_page_1_per_5_data["items"][1]["product_name"], "product_1")
+        self.assertEqual(retrieve_page_1_per_5_data["items"][2]["product_name"], "product_2")
+        self.assertEqual(retrieve_page_1_per_5_data["items"][3]["product_name"], "product_3")
+        self.assertEqual(retrieve_page_1_per_5_data["items"][4]["product_name"], "product_4")
 
-        retrive_page_2_and_5_per_page_response = retrieve_all_products(self, 2, 5)
-        retrive_page_2_and_5_per_page_data = (
-            retrive_page_2_and_5_per_page_response.get_json()
-        )
-        self.assertEqual(retrive_page_2_and_5_per_page_data["page"], 2)
-        self.assertEqual(retrive_page_2_and_5_per_page_data["total_pages"], 2)
-        self.assertEqual(retrive_page_2_and_5_per_page_data["items_per_page"], 5)
-        self.assertEqual(retrive_page_2_and_5_per_page_data["total_items"], 7)
-        self.assertEqual(
-            retrive_page_2_and_5_per_page_data["items"][0]["product_name"], "product_5"
-        )
-        self.assertEqual(
-            retrive_page_2_and_5_per_page_data["items"][1]["product_name"], "product_6"
-        )
+        retrieve_page_2_per_5_response = retrieve_all_products(self, page_num=2, per_page=5)
+        retrieve_page_2_per_5_data = retrieve_page_2_per_5_response.get_json()
+        self.assertEqual(retrieve_page_2_per_5_data["page"], 2)
+        self.assertEqual(retrieve_page_2_per_5_data["total_pages"], 2)
+        self.assertEqual(retrieve_page_2_per_5_data["items_per_page"], 5)
+        self.assertEqual(retrieve_page_2_per_5_data["total_items"], 7)
+        self.assertEqual(retrieve_page_2_per_5_data["items"][0]["product_name"], "product_5")
+        self.assertEqual(retrieve_page_2_per_5_data["items"][1]["product_name"], "product_6")
 
-        retrive_page_1_and_10_per_page_response = retrieve_all_products(self, 1, 10)
-        retrive_page_1_and_10_per_page_data = (
-            retrive_page_1_and_10_per_page_response.get_json()
-        )
-        self.assertEqual(retrive_page_1_and_10_per_page_data["page"], 1)
-        self.assertEqual(retrive_page_1_and_10_per_page_data["total_pages"], 1)
-        self.assertEqual(retrive_page_1_and_10_per_page_data["items_per_page"], 10)
-        self.assertEqual(retrive_page_1_and_10_per_page_data["total_items"], 7)
-        self.assertEqual(
-            retrive_page_1_and_10_per_page_data["items"][0]["product_name"],
-            "python_v3_7",
-        )
-        self.assertEqual(
-            retrive_page_1_and_10_per_page_data["items"][1]["product_name"], "product_1"
-        )
-        self.assertEqual(
-            retrive_page_1_and_10_per_page_data["items"][2]["product_name"], "product_2"
-        )
-        self.assertEqual(
-            retrive_page_1_and_10_per_page_data["items"][3]["product_name"], "product_3"
-        )
-        self.assertEqual(
-            retrive_page_1_and_10_per_page_data["items"][4]["product_name"], "product_4"
-        )
-        self.assertEqual(
-            retrive_page_1_and_10_per_page_data["items"][5]["product_name"], "product_5"
-        )
-        self.assertEqual(
-            retrive_page_1_and_10_per_page_data["items"][6]["product_name"], "product_6"
-        )
+        retrieve_page_1_per_10_response = retrieve_all_products(self, page_num=1, per_page=10)
+        retrieve_page_1_per_10_data = (retrieve_page_1_per_10_response.get_json())
+        self.assertEqual(retrieve_page_1_per_10_data["page"], 1)
+        self.assertEqual(retrieve_page_1_per_10_data["total_pages"], 1)
+        self.assertEqual(retrieve_page_1_per_10_data["items_per_page"], 10)
+        self.assertEqual(retrieve_page_1_per_10_data["total_items"], 7)
+        self.assertEqual(retrieve_page_1_per_10_data["items"][0]["product_name"], "python_v3_7")
+        self.assertEqual(retrieve_page_1_per_10_data["items"][1]["product_name"], "product_1")
+        self.assertEqual(retrieve_page_1_per_10_data["items"][2]["product_name"], "product_2")
+        self.assertEqual(retrieve_page_1_per_10_data["items"][3]["product_name"], "product_3")
+        self.assertEqual(retrieve_page_1_per_10_data["items"][4]["product_name"], "product_4")
+        self.assertEqual(retrieve_page_1_per_10_data["items"][5]["product_name"], "product_5")
+        self.assertEqual(retrieve_page_1_per_10_data["items"][6]["product_name"], "product_6")
+
+        retrieve_page_defaults_response = retrieve_all_products(self, page_num=None, per_page=None)
+        retrieve_page_defaults_data = retrieve_page_defaults_response.get_json()
+        self.assertEqual(retrieve_page_defaults_data["page"], 1)
+        self.assertEqual(retrieve_page_defaults_data["total_pages"], 1)
+        self.assertEqual(retrieve_page_defaults_data["items_per_page"], 10)
+        self.assertEqual(retrieve_page_defaults_data["total_items"], 7)
+        self.assertEqual(retrieve_page_defaults_data["items"][0]["product_name"], "python_v3_7")
+        self.assertEqual(retrieve_page_defaults_data["items"][1]["product_name"], "product_1")
+        self.assertEqual(retrieve_page_defaults_data["items"][2]["product_name"], "product_2")
+        self.assertEqual(retrieve_page_defaults_data["items"][3]["product_name"], "product_3")
+        self.assertEqual(retrieve_page_defaults_data["items"][4]["product_name"], "product_4")
+        self.assertEqual(retrieve_page_defaults_data["items"][5]["product_name"], "product_5")
+        self.assertEqual(retrieve_page_defaults_data["items"][6]["product_name"], "product_6")
 
     def test_retrieve_product_does_not_exist(self):
         with self.client:

@@ -2,9 +2,7 @@
 import json
 import re
 from base64 import standard_b64decode, standard_b64encode
-from pathlib import Path
 
-from flask import current_app
 from Cryptodome.Cipher import AES, PKCS1_OAEP
 from Cryptodome.Hash import SHA256
 from Cryptodome.PublicKey import RSA

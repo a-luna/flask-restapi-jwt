@@ -4,14 +4,14 @@ from http import HTTPStatus
 from flask_restplus import Resource
 
 from app.api.auth.decorator import admin_token_required
-from app.api.product import product_ns
-from app.api.product.business import (
+from app.api.products import product_ns
+from app.api.products.business import (
     retrieve_product,
     create_product,
     update_product,
     delete_product,
 )
-from app.api.product.dto import (
+from app.api.products.dto import (
     post_product_parser,
     put_product_parser,
     pagination_parser,

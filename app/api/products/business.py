@@ -37,7 +37,7 @@ def create_product(data):
         )
         response = jsonify(response_object)
         response.status_code = HTTPStatus.CREATED
-        response.headers["Location"] = f"/api/v1/product/{product_name}"
+        response.headers["Location"] = f"/api/v1/products/{product_name}"
         return response
     except Exception as e:
         error = f"Error: {repr(e)}"

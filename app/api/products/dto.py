@@ -4,7 +4,7 @@ import re
 from flask_restplus import fields, reqparse
 from flask_restplus.inputs import URL
 
-from app.api.product import product_ns
+from app.api.products import product_ns
 
 
 def product_name(name):
